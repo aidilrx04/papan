@@ -1,10 +1,29 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 
+	const formatter = new Intl.NumberFormat("ms-MY", {
+		currency: "MYR",
+		maximumFractionDigits: 2,
+		currencyDisplay: "symbol",
+	});
+
+	let amountInputElement: HTMLInputElement;
+
 	let spending: string = $state("");
 	let label: string = $state("");
 
 	let spendings: any[] = $state([]);
+
+	let totalSpent = $derived.by(function () {
+		return spendings.reduce(
+			(carry, curr) => carry + Number(curr.spending),
+			0,
+		);
+	});
+
+	$effect(function () {
+		console.log(totalSpent);
+	});
 
 	onMount(function () {
 		let storedSpendings = localStorage.getItem("spendings");
@@ -13,9 +32,13 @@
 
 	function onAdd(e: any) {
 		e.preventDefault();
+
+		let date = new Date().toISOString();
+
 		spendings.unshift({
 			spending,
 			label,
+			date,
 		});
 
 		spending = "";
@@ -32,6 +55,10 @@
 
 	function showModal() {
 		isModalShown = true;
+		console.log(amountInputElement);
+		setTimeout(() => {
+			amountInputElement.focus();
+		}, 50);
 	}
 	function hideModal() {
 		isModalShown = false;
@@ -46,14 +73,16 @@
 		<span class="uppercase font-semibold block mb-1 text-gray-400">
 			You have spent
 		</span>
-		<b class="font-bold text-6xl block mb-1 uppercase">RM 0.00</b>
+		<b class="font-bold text-6xl block mb-1 uppercase"
+			>RM {formatter.format(totalSpent)}</b
+		>
 		<span class="text-violet-400 font-semibold">RM 10.00 budget</span>
 	</section>
 	<section id="spending-list">
 		<ul>
 			{#each spendings as s}
 				<li
-					class="even:bg-black/25 p-4 hover:bg-black/35 cursor-pointer transition-colors"
+					class="even:bg-black/25 p-4 hover:bg-black/35 active:bg-black/35 focus:bg-black/35 cursor-pointer transition-colors"
 				>
 					<div class="flex items-center justify-between">
 						<span class="block flex-1">{s.label}</span>
@@ -71,6 +100,8 @@
 		id="add-spending-modal"
 		class="fixed top-0 left-0 w-screen h-screen z-10 hidden group-[.show-modal]:block"
 	>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="modal-bg absolute size-full bg-black/50"
 			onclick={hideModal}
@@ -88,12 +119,13 @@
 					>Amount</label
 				>
 				<input
-					class="block w-full px-4 py-2.5 bg-black/10 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 outline-none"
+					class="block w-full px-4 py-2.5 bg-black/10 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600"
 					type="number"
 					bind:value={spending}
 					name="amount"
 					id="amount"
 					autocomplete="off"
+					bind:this={amountInputElement}
 				/>
 			</div>
 			<div class="mb-4">
@@ -103,7 +135,7 @@
 					>Label</label
 				>
 				<input
-					class="block w-full px-4 py-2.5 bg-black/10 hover:bg-black/5 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 outline-none"
+					class="block w-full px-4 py-2.5 bg-black/10 hover:bg-black/5 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600"
 					type="text"
 					bind:value={label}
 					name="label"
