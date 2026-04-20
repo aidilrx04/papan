@@ -52,7 +52,9 @@
 	<section id="spending-list">
 		<ul>
 			{#each spendings as s}
-				<li class="even:bg-black/25 p-4">
+				<li
+					class="even:bg-black/25 p-4 hover:bg-black/35 cursor-pointer transition-colors"
+				>
 					<div class="flex items-center justify-between">
 						<span class="block flex-1">{s.label}</span>
 						<span
