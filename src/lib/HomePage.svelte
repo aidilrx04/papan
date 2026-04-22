@@ -82,7 +82,7 @@
 		<span class="uppercase font-semibold block mb-1 text-gray-400">
 			You have spent
 		</span>
-		<b class="font-bold text-6xl block mb-1 uppercase"
+		<b class="font-bold text-4xl block mb-1 uppercase"
 			>RM {formatter.format(totalSpent)}</b
 		>
 		<span class="text-violet-400 font-semibold">RM 10.00 budget</span>
