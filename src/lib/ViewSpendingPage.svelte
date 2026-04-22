@@ -64,7 +64,7 @@
 	</section>
 	<div class="p-4">
 		<button
-			class="px-4 py-2.5 text-center block w-full rounded border-3 border-rose-800 text-rose-400 cursor-pointer font-semibold transition-colors duration-75 hover:bg-rose-800 hover:text-gray-100 active:bg-rose-600 hover:border-rose-800 active:border-rose-600"
+			class="px-4 py-2.5 text-center block w-full rounded border-3 border-rose-800 text-rose-400 cursor-pointer font-semibold transition-colors duration-75 hover:bg-rose-800 hover:text-gray-100 active:text-gray-100 active:bg-rose-600 hover:border-rose-800 active:border-rose-600"
 			>Delete</button
 		>
 	</div>
