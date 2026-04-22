@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { createSpending, getSpendings } from "./api";
 
 	const formatter = new Intl.NumberFormat("ms-MY", {
 		currency: "MYR",
 		maximumFractionDigits: 2,
 		currencyDisplay: "symbol",
+		style: "currency",
 	});
 
 	let amountInputElement: HTMLInputElement;
@@ -12,40 +14,32 @@
 	let spending: string = $state("");
 	let label: string = $state("");
 
+	let loading = $state(true);
 	let spendings: any[] = $state([]);
 
 	let totalSpent = $derived.by(function () {
 		return spendings.reduce(
-			(carry, curr) => carry + Number(curr.spending),
+			(carry, curr) => carry + Number(curr.amount),
 			0,
 		);
 	});
 
 	onMount(function () {
-		let storedSpendings = localStorage.getItem("spendings");
-		spendings = JSON.parse(storedSpendings!) || [];
-		// console.log(history.state, history.length);
+		getSpendings().then((_spendings) => {
+			spendings = _spendings;
+			loading = false;
+		});
 	});
 
 	function onAdd(e: any) {
 		e.preventDefault();
 
-		let date = new Date().toISOString();
-
-		spendings.unshift({
-			spending,
-			label,
-			date,
+		createSpending({ amount: spending, note: label }).then(() => {
+			getSpendings().then((_sp) => (spendings = _sp));
 		});
 
 		spending = "";
 		label = "";
-
-		saveSpendings();
-	}
-
-	function saveSpendings() {
-		localStorage.setItem("spendings", JSON.stringify(spendings));
 	}
 
 	let isModalShown = $state(false);
@@ -83,25 +77,62 @@
 			You have spent
 		</span>
 		<b class="font-bold text-4xl block mb-1 uppercase"
-			>RM {formatter.format(totalSpent)}</b
+			>{#if loading}
+				RM --.--
+			{:else}
+				{formatter.format(totalSpent)}
+			{/if}</b
 		>
 		<span class="text-violet-400 font-semibold">RM 10.00 budget</span>
 	</section>
 	<section id="spending-list">
+		{#if loading}
+			<div
+				class="loading-spendings py-16 px-4 text-center flex items-center justify-center"
+			>
+				<span class="animate-bounce">
+					<svg
+						class="animate-spin -ml-1 mr-3 size-8 text-violet-400"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<circle
+							class="opacity-25"
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							stroke-width="4"
+						></circle>
+						<path
+							class="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+						></path>
+					</svg>
+				</span>
+			</div>
+		{/if}
+
+		{#if !loading && spendings.length === 0}
+			<div class="empty-spendings text-center text-gray-400 py-16 px-4">
+				<span>No spending record</span>
+			</div>
+		{/if}
+
 		<ul>
-			{#each spendings as s, i}
+			{#each spendings as s (s.id)}
 				<li class="even:bg-black/25">
 					<a
-						href={`/spending/${i}`}
-						data-id={i}
-						// onclick={viewSpending}
+						href={`/spending/${s.id}`}
 						class=" p-4 hover:bg-black/35 active:bg-black/35 focus:bg-black/35 cursor-pointer transition-colors block"
 					>
 						<div class="flex items-center justify-between">
-							<span class="block flex-1">{s.label}</span>
+							<span class="block flex-1">{s.note}</span>
 							<span
 								class="font-semibold text-rose-400 block min-w-24 text-right"
-								>- RM {s.spending}</span
+								>- {formatter.format(s.amount)}</span
 							>
 						</div>
 					</a>
