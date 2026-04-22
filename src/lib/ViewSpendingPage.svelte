@@ -19,13 +19,35 @@
 		currencyDisplay: "code",
 		style: "currency",
 	});
+
+	let isDeleteModalShown = $state(false);
+
+	function showModal() {
+		isDeleteModalShown = true;
+	}
+
+	function hideModal() {
+		isDeleteModalShown = false;
+	}
+
+	function deleteSpending() {
+		let sid = Number(spendingId);
+		const newSpendings = [
+			...storedSpendings.slice(0, sid),
+			...storedSpendings.slice(sid + 1),
+		];
+
+		localStorage.setItem("spendings", JSON.stringify(newSpendings));
+
+		location.href = "/";
+	}
 </script>
 
 <div id="view-spending" class="h-screen flex flex-col">
 	<div class="p-4 flex justify-between items-center">
 		<a href="/" class="text-sky-400">Back</a>
 		<h1 class="text-gray-100 font-semibold text-xl">Spending</h1>
-		<button class="text-rose-600">delete</button>
+		<button class="text-rose-600" onclick={showModal}>delete</button>
 	</div>
 	<section class="p-4 py-8 flex-1 flex flex-col">
 		<div class="flex-1">
@@ -65,13 +87,23 @@
 	<div class="p-4">
 		<button
 			class="px-4 py-2.5 text-center block w-full rounded border-3 border-rose-800 text-rose-400 cursor-pointer font-semibold transition-colors duration-75 hover:bg-rose-800 hover:text-gray-100 active:text-gray-100 active:bg-rose-600 hover:border-rose-800 active:border-rose-600"
-			>Delete</button
+			onclick={showModal}>Delete</button
 		>
 	</div>
 </div>
 
-<div id="delete-modal" class="fixed top-0 left-0 h-screen w-screen z-10 hidden">
-	<div class="bg-black/50 absolute top-0 left-0 size-full"></div>
+<div
+	id="delete-modal"
+	class="fixed top-0 left-0 h-screen w-screen z-10 {!isDeleteModalShown
+		? 'hidden'
+		: ''}"
+>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="bg-black/50 absolute top-0 left-0 size-full"
+		onclick={hideModal}
+	></div>
 	<div
 		class="z-10 rounded-xl p-4 bg-gray-800 relative w-8/12 top-1/2 left-1/2 -translate-1/2"
 	>
@@ -83,11 +115,11 @@
 		<div class="actions flex justify-end items-center gap-4">
 			<button
 				class="text-gray-100 px-6 py-2.5 rounded cursor-pointer font-semibold hover:bg-black/25 active:bg-black/50 duration-75 transition-colors"
-				>Cancel</button
+				onclick={hideModal}>Cancel</button
 			>
 			<button
 				class="text-gray-100 bg-rose-700 px-6 py-2.5 rounded cursor-pointer font-semibold hover:bg-rose-600 active:bg-rose-800 duration-75 transition-colors"
-				>Delete</button
+				onclick={deleteSpending}>Delete</button
 			>
 		</div>
 	</div>
