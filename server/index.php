@@ -57,6 +57,7 @@ if ($action === "POST" && isset($parsed['_method'])) {
 $output = null;
 
 header("Content-Type: application/json", true, 200);
+header("Access-Control-Allow-Origin: *");
 
 switch ($action) {
 	case "GET":
