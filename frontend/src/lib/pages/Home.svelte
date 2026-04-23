@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { createSpending, getSpendings } from "../api";
+	import Modal from "../components/Modal.svelte";
 
 	const formatter = new Intl.NumberFormat("ms-MY", {
 		currency: "MYR",
@@ -9,7 +10,7 @@
 		style: "currency",
 	});
 
-	let amountInputElement: HTMLInputElement;
+	let amountInputElement: HTMLInputElement | undefined = $state();
 
 	let amount: string = $state("");
 	let note: string = $state("");
@@ -48,7 +49,7 @@
 		isModalShown = true;
 		console.log(amountInputElement);
 		setTimeout(() => {
-			amountInputElement.focus();
+			amountInputElement!.focus();
 		}, 50);
 	}
 	function hideModal() {
@@ -129,21 +130,33 @@
 		</ul>
 	</section>
 
-	<div
-		id="add-spending-modal"
-		class="fixed top-0 left-0 w-screen h-screen z-10 hidden group-[.show-modal]:block"
-	>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="modal-bg absolute size-full bg-black/50"
-			onclick={hideModal}
-		></div>
-		<form
-			action=""
-			onsubmit={onAdd}
-			class="z-10 relative bg-gray-800 w-9/12 top-1/2 left-1/2 -translate-1/2 p-4 rounded-xl"
+	<div id="bottom-bar" class="p-4 fixed bottom-0 left-0 w-full bg-gray-800">
+		<button
+			onclick={showModal}
+			class="font-semibold text-lg flex items-center gap-2 uppercase bg-violet-600 text-gray-50 w-full px-4 py-2.5 rounded justify-center hover:bg-violet-500 active:bg-violet-700 cursor-pointer transition-colors duration-75"
 		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-6 text-inherit"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M12 4.5v15m7.5-7.5h-15"
+				/>
+			</svg>
+			<span>Add</span>
+		</button>
+	</div>
+</main>
+
+{#if isModalShown}
+	<Modal {hideModal}>
+		<form action="" onsubmit={onAdd}>
 			<h2 class="text-2xl font-semibold mb-4">Add Spending</h2>
 			<div class="mb-4">
 				<label
@@ -193,27 +206,5 @@
 				</button>
 			</div>
 		</form>
-	</div>
-	<div id="bottom-bar" class="p-4 fixed bottom-0 left-0 w-full bg-gray-800">
-		<button
-			onclick={showModal}
-			class="font-semibold text-lg flex items-center gap-2 uppercase bg-violet-600 text-gray-50 w-full px-4 py-2.5 rounded justify-center hover:bg-violet-500 active:bg-violet-700 cursor-pointer transition-colors duration-75"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="size-6 text-inherit"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M12 4.5v15m7.5-7.5h-15"
-				/>
-			</svg>
-			<span>Add</span>
-		</button>
-	</div>
-</main>
+	</Modal>
+{/if}

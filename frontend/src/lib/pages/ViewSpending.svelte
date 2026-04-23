@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { deleteSpending, getSpending } from "../api";
+	import Modal from "../components/Modal.svelte";
 
 	const ID_RE = /\/spending\/(\d+)/;
 	const path = location.pathname;
@@ -147,21 +148,8 @@
 	</div>
 </div>
 
-<div
-	id="delete-modal"
-	class="fixed top-0 left-0 h-screen w-screen z-10 {!isDeleteModalShown
-		? 'hidden'
-		: ''}"
->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="bg-black/50 absolute top-0 left-0 size-full"
-		onclick={hideModal}
-	></div>
-	<div
-		class="z-10 rounded-xl p-4 bg-gray-800 relative w-8/12 top-1/2 left-1/2 -translate-1/2"
-	>
+{#if isDeleteModalShown}
+	<Modal {hideModal}>
 		<h2 class="text-xl font-semibold text-gray-100 mb-4">
 			Delete spending
 		</h2>
@@ -177,5 +165,5 @@
 				onclick={confirmDelete}>Delete</button
 			>
 		</div>
-	</div>
-</div>
+	</Modal>
+{/if}
