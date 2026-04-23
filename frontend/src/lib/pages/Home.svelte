@@ -98,7 +98,9 @@
 							<span class="block flex-1">{s.note}</span>
 							<span
 								class="font-semibold text-rose-400 block min-w-24 text-right"
-								>- {currencyFormatter.format(s.amount)}</span
+								>- {currencyFormatter.format(
+									Number(s.amount),
+								)}</span
 							>
 						</div>
 					</a>
