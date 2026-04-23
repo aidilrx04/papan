@@ -55,7 +55,7 @@
 	}
 </script>
 
-<main id="papan-app" class="p-4 pb-24 group {isModalShown ? 'show-modal' : ''}">
+<main id="papan-app" class="p-4 pb-24">
 	<section
 		id="balance-tracker"
 		class="px-4 py-8 border-violet-600 border-2 rounded-lg bg-black/50 mb-4"
