@@ -20,10 +20,7 @@
 	let spendings: Spending[] = $state([]);
 
 	let totalSpent = $derived.by(function () {
-		return spendings.reduce(
-			(carry, curr) => carry + Number(curr.amount),
-			0,
-		);
+		return spendings.reduce((carry, curr) => carry + curr.amount, 0);
 	});
 
 	onMount(function () {
