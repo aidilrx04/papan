@@ -4,24 +4,27 @@
 	import Modal from "../components/Modal.svelte";
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, dateFormatter } from "../formatter";
+	import type { Spending } from "../types";
 
 	const ID_RE = /\/spending\/(\d+)/;
 	const path = location.pathname;
-	const spendingId = path.match(ID_RE)?.[1];
+	const spendingId = Number(path.match(ID_RE)?.[1]);
 
 	let loading = $state(true);
-	let spending = $state<any>({});
+	let spending = $state<Spending>({
+		id: -1,
+		amount: "",
+		date: "",
+		note: "",
+	});
 
 	onMount(function () {
 		getSpending(spendingId).then(function (_spending) {
-			spending = _spending;
 			loading = false;
-
 			if (_spending === null) {
 				return;
 			}
-
-			_spending.date = new Date(_spending.date);
+			spending = _spending;
 		});
 	});
 
@@ -77,7 +80,9 @@
 					>
 					<span
 						class=" font-bold mb-4 text-4xl tracking-wide block text-violet-400"
-						>{currencyFormatter.format(spending.amount)}</span
+						>{currencyFormatter.format(
+							Number(spending.amount),
+						)}</span
 					>
 				</div>
 
@@ -89,7 +94,7 @@
 
 					<span class="text-gray-200 mb-4 text-lg block"
 						>{spending.date
-							? dateFormatter.format(spending.date)
+							? dateFormatter.format(new Date(spending.date))
 							: "Unspecified"}</span
 					>
 				</div>
