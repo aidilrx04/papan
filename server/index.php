@@ -66,23 +66,6 @@ switch ($action) {
 		}
 		break;
 
-	// case "DELETE":
-	// 	$id = isset($parsed['id']) ? $parsed['id'] : null;
-
-	// 	if ($id === null) {
-	// 		http_response_code(400);
-	// 		break;
-	// 	}
-
-	// 	$success = deleteSpending($id);
-
-	// 	if ($success) {
-	// 		http_response_code(200);
-	// 	} else {
-	// 		http_response_code(500);
-	// 	}
-
-	// 	break;
 	default:
 		http_response_code(405);
 		$output = json_encode(['message' => 'Method Not Allowed']);
