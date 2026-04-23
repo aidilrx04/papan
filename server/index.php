@@ -12,7 +12,7 @@ function getSpendings()
 	return $result->fetch_all(MYSQLI_ASSOC);
 }
 
-function createSpending($data)
+function createSpending(array $data)
 {
 	global $conn;
 
