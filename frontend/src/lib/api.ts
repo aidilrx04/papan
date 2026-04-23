@@ -32,7 +32,7 @@ export async function getSpending(id: number): Promise<Spending | null> {
 	return await res.json();
 }
 
-export async function deleteSpending(id: any) {
+export async function deleteSpending(id: number) {
 	const res = await fetch(`${API_URL}/spending.php?id=${id}`, {
 		method: "POST",
 		headers: {
