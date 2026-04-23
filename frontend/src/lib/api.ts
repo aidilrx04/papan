@@ -24,22 +24,22 @@ export async function createSpending(data: any) {
 	return res.status;
 }
 
-export async function getSpending(id:any){
+export async function getSpending(id: any) {
 	const res = await fetch(`${API_URL}/spending.php?id=${id}`);
 
-	if(res.status === 404) return null;
+	if (res.status === 404) return null;
 
 	return await res.json();
 }
 
-export async function deleteSpending(id: any){
+export async function deleteSpending(id: any) {
 	const res = await fetch(`${API_URL}/spending.php?id=${id}`, {
 		method: "POST",
 		headers: {
-			'Content-Type':'application/json'
+			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			'_method':'DELETE'
+			'_method': 'DELETE'
 		})
 	});
 
