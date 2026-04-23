@@ -25,6 +25,8 @@ export async function createSpending(data: any) {
 export async function getSpending(id:any){
 	const res = await fetch(`${API_URL}/spending.php?id=${id}`);
 
+	if(res.status === 404) return null;
+
 	return await res.json();
 }
 
