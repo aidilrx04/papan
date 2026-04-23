@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import { createSpending, getSpendings } from "../api";
 	import Modal from "../components/Modal.svelte";
+	import type { Spending } from "../types";
 
 	const formatter = new Intl.NumberFormat("ms-MY", {
 		currency: "MYR",
@@ -16,7 +17,7 @@
 	let note: string = $state("");
 
 	let loading = $state(true);
-	let spendings: any[] = $state([]);
+	let spendings: Spending[] = $state([]);
 
 	let totalSpent = $derived.by(function () {
 		return spendings.reduce(
