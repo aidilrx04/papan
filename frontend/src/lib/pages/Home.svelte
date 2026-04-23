@@ -12,7 +12,7 @@
 	let amountInputElement: HTMLInputElement;
 
 	let amount: string = $state("");
-	let label: string = $state("");
+	let note: string = $state("");
 
 	let loading = $state(true);
 	let spendings: any[] = $state([]);
@@ -34,12 +34,12 @@
 	function onAdd(e: any) {
 		e.preventDefault();
 
-		createSpending({ amount, note: label }).then(() => {
+		createSpending({ amount, note }).then(() => {
 			getSpendings().then((_sp) => (spendings = _sp));
 		});
 
 		amount = "";
-		label = "";
+		note = "";
 	}
 
 	let isModalShown = $state(false);
@@ -182,7 +182,7 @@
 				<input
 					class="block w-full px-4 py-2.5 bg-black/10 hover:bg-black/5 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600"
 					type="text"
-					bind:value={label}
+					bind:value={note}
 					name="label"
 					id="label"
 					autocomplete="on"
