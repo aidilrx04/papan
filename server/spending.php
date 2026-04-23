@@ -15,6 +15,8 @@ function getSpending($id)
 
 	$result = $stmt->get_result();
 
+	if ($result->num_rows === 0) return null;
+
 	return $result->fetch_assoc();
 }
 
@@ -64,6 +66,10 @@ $output = null;
 switch ($action) {
 	case 'GET':
 		$spending = getSpending($id);
+
+		if ($spending === null) {
+			http_response_code(404);
+		}
 
 		$output = $spending;
 
