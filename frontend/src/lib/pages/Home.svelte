@@ -13,6 +13,7 @@
 
 	let loading = $state(true);
 	let spendings: Spending[] = $state([]);
+	let error = $state<any>(null);
 
 	let totalSpent = $derived.by(function () {
 		return spendings.reduce(
@@ -22,17 +23,23 @@
 	});
 
 	onMount(function () {
-		getSpendings().then((_spendings) => {
-			spendings = _spendings;
-			loading = false;
-		});
+		getSpendings()
+			.then((_spendings) => {
+				spendings = _spendings;
+			})
+			.catch(handleGetSpendingError)
+			.finally(() => {
+				loading = false;
+			});
 	});
 
 	function onAdd(e: Event) {
 		e.preventDefault();
 
 		createSpending({ amount: Number(amount), note }).then(() => {
-			getSpendings().then((_sp) => (spendings = _sp));
+			getSpendings()
+				.then((_sp) => (spendings = _sp))
+				.catch(handleGetSpendingError);
 		});
 
 		amount = "";
@@ -51,6 +58,14 @@
 	function hideModal() {
 		isModalShown = false;
 	}
+
+	function handleGetSpendingError(err: Error) {
+		error = error ?? {};
+		error.message = err.message;
+		if (err.message === "Failed to fetch") {
+			error.message = "Unable to connect to server.";
+		}
+	}
 </script>
 
 <main id="papan-app" class="p-4 pb-24">
@@ -62,7 +77,7 @@
 			You have spent
 		</span>
 		<b class="font-bold text-4xl block mb-1 uppercase"
-			>{#if loading}
+			>{#if loading || error}
 				RM --.--
 			{:else}
 				{currencyFormatter.format(totalSpent)}
@@ -81,9 +96,15 @@
 			</div>
 		{/if}
 
-		{#if !loading && spendings.length === 0}
+		{#if !loading && spendings.length === 0 && !error}
 			<div class="empty-spendings text-center text-gray-400 py-16 px-4">
 				<span>No spending record</span>
+			</div>
+		{/if}
+
+		{#if !loading && error}
+			<div class="error text-center text-rose-400 py-16 px-4">
+				<span>{error.message}</span>
 			</div>
 		{/if}
 
@@ -112,7 +133,8 @@
 	<div id="bottom-bar" class="p-4 fixed bottom-0 left-0 w-full bg-gray-800">
 		<button
 			onclick={showModal}
-			class="font-semibold text-lg flex items-center gap-2 uppercase bg-violet-600 text-gray-50 w-full px-4 py-2.5 rounded justify-center hover:bg-violet-500 active:bg-violet-700 cursor-pointer transition-colors duration-75"
+			class="font-semibold text-lg flex items-center gap-2 uppercase bg-violet-600 text-gray-50 w-full px-4 py-2.5 rounded justify-center hover:bg-violet-500 active:bg-violet-700 cursor-pointer transition-colors duration-75 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-violet-600"
+			disabled={error || loading}
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
