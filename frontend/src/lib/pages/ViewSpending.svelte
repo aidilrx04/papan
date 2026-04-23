@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { deleteSpending, getSpending } from "./api";
+	import { deleteSpending, getSpending } from "../api";
 
 	const ID_RE = /\/spending\/(\d+)/;
 	const path = location.pathname;
