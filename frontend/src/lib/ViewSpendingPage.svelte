@@ -60,7 +60,9 @@
 	<div class="p-4 flex justify-between items-center">
 		<a href="/" class="text-sky-400">Back</a>
 		<h1 class="text-gray-100 font-semibold text-xl">Spending</h1>
-		<button class="text-rose-600" onclick={showModal}>delete</button>
+		<button class="text-rose-400 cursor-pointer" onclick={showModal}
+			>Delete</button
+		>
 	</div>
 	<section class="p-4 py-8 flex-1 flex flex-col">
 		<div class="flex-1">
