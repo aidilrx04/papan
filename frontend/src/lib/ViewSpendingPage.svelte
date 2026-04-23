@@ -1,23 +1,36 @@
 <script lang="ts">
-	const storedSpendings = JSON.parse(
-		localStorage.getItem("spendings") || "[]",
-	) as any[];
-
-	if (storedSpendings.length === 0) {
-		console.warn("EMPTY stored spendings");
-	}
+	import { onMount } from "svelte";
+	import { deleteSpending, getSpending } from "./api";
 
 	const ID_RE = /\/spending\/(\d+)/;
 	const path = location.pathname;
 	const spendingId = path.match(ID_RE)?.[1];
-	const spending = storedSpendings[Number(spendingId)];
-	console.log(spending);
 
-	const formatter = new Intl.NumberFormat("ms-MY", {
+	let loading = $state(true);
+	let spending = $state<any>({});
+
+	onMount(function () {
+		getSpending(spendingId).then(function (_spending) {
+			_spending.date = new Date(_spending.date);
+			spending = _spending;
+			loading = false;
+		});
+	});
+
+	const currencyFormatter = new Intl.NumberFormat("ms-MY", {
 		currency: "MYR",
 		maximumFractionDigits: 2,
 		currencyDisplay: "code",
 		style: "currency",
+	});
+
+	const dateFormatter = new Intl.DateTimeFormat("en-MY", {
+		hour: "numeric",
+		minute: "numeric",
+		day: "2-digit",
+		month: "short",
+		year: "numeric",
+		weekday: "short",
 	});
 
 	let isDeleteModalShown = $state(false);
@@ -30,16 +43,11 @@
 		isDeleteModalShown = false;
 	}
 
-	function deleteSpending() {
-		let sid = Number(spendingId);
-		const newSpendings = [
-			...storedSpendings.slice(0, sid),
-			...storedSpendings.slice(sid + 1),
-		];
-
-		localStorage.setItem("spendings", JSON.stringify(newSpendings));
-
-		location.href = "/";
+	function confirmDelete() {
+		deleteSpending(spendingId).then((b) => {
+			console.log("deleted: ", b);
+		});
+		// location.href = "/";
 	}
 </script>
 
@@ -58,7 +66,7 @@
 				>
 				<span
 					class=" font-bold mb-4 text-4xl tracking-wide block text-violet-400"
-					>{formatter.format(spending.spending)}</span
+					>{currencyFormatter.format(spending.amount)}</span
 				>
 			</div>
 
@@ -69,7 +77,9 @@
 				>
 
 				<span class="text-gray-200 mb-4 text-lg block"
-					>{spending.date ?? "Unspecified"}</span
+					>{spending.date
+						? dateFormatter.format(spending.date)
+						: "Unspecified"}</span
 				>
 			</div>
 
@@ -79,7 +89,7 @@
 					>Note</span
 				>
 				<p class="text-gray-200 mb-4 text-lg block">
-					{spending.label}
+					{spending.note}
 				</p>
 			</div>
 		</div>
@@ -119,7 +129,7 @@
 			>
 			<button
 				class="text-gray-100 bg-rose-700 px-6 py-2.5 rounded cursor-pointer font-semibold hover:bg-rose-600 active:bg-rose-800 duration-75 transition-colors"
-				onclick={deleteSpending}>Delete</button
+				onclick={confirmDelete}>Delete</button
 			>
 		</div>
 	</div>

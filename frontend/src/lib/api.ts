@@ -21,3 +21,23 @@ export async function createSpending(data: any) {
 
 	return res.status;
 }
+
+export async function getSpending(id:any){
+	const res = await fetch(`${API_URL}/spending.php?id=${id}`);
+
+	return await res.json();
+}
+
+export async function deleteSpending(id: any){
+	const res = await fetch(`${API_URL}/spending.php?id=${id}`, {
+		method: "POST",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		body: JSON.stringify({
+			'_method':'DELETE'
+		})
+	});
+
+	return res.status === 200 ? true : false;
+}
