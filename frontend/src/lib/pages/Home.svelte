@@ -11,7 +11,7 @@
 
 	let amountInputElement: HTMLInputElement;
 
-	let spending: string = $state("");
+	let amount: string = $state("");
 	let label: string = $state("");
 
 	let loading = $state(true);
@@ -34,11 +34,11 @@
 	function onAdd(e: any) {
 		e.preventDefault();
 
-		createSpending({ amount: spending, note: label }).then(() => {
+		createSpending({ amount, note: label }).then(() => {
 			getSpendings().then((_sp) => (spendings = _sp));
 		});
 
-		spending = "";
+		amount = "";
 		label = "";
 	}
 
@@ -166,7 +166,7 @@
 				<input
 					class="block w-full px-4 py-2.5 bg-black/10 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600"
 					type="number"
-					bind:value={spending}
+					bind:value={amount}
 					name="amount"
 					id="amount"
 					autocomplete="off"
