@@ -33,7 +33,7 @@
 		});
 	});
 
-	function onAdd(e: any) {
+	function onAdd(e: Event) {
 		e.preventDefault();
 
 		createSpending({ amount, note }).then(() => {
