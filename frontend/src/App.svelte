@@ -1,5 +1,5 @@
 <script lang="ts">
-	import HomePage from "./lib/HomePage.svelte";
+	import HomePage from "./lib/pages/Home.svelte";
 	import NotFound from "./lib/pages/NotFound.svelte";
 	import ViewSpendingPage from "./lib/ViewSpendingPage.svelte";
 

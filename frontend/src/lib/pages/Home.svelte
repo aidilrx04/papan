@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { createSpending, getSpendings } from "./api";
+	import { createSpending, getSpendings } from "../api";
 
 	const formatter = new Intl.NumberFormat("ms-MY", {
 		currency: "MYR",
