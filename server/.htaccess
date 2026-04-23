@@ -1,0 +1,6 @@
+# Block access to the error_log file
+<Files "error_log">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</Files>
