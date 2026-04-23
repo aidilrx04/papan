@@ -1,5 +1,7 @@
 <?php
 
+require_once('database.php');
+
 function getSpendings()
 {
 	global $conn;
@@ -35,13 +37,6 @@ function deleteSpending($id)
 
 	return $stmt->affected_rows > 0;
 }
-
-$host = '127.0.0.1';
-$user = 'root';
-$pass = '';
-$name = 'papan';
-
-$conn = mysqli_connect($host, $user, $pass, $name);
 
 $action = $_SERVER['REQUEST_METHOD'];
 $parsed = null;
