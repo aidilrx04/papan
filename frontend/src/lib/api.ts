@@ -1,4 +1,4 @@
-import type { Spending } from "./types";
+import type { PendingCreateSpending, Spending } from "./types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1';
 
@@ -8,7 +8,7 @@ export async function getSpendings(): Promise<Spending[]> {
 	return await res.json();
 }
 
-export async function createSpending(data: any) {
+export async function createSpending(data: PendingCreateSpending) {
 	const res = await fetch(`${API_URL}/`, {
 		method: "POST",
 		body: JSON.stringify({

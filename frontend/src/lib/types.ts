@@ -4,3 +4,8 @@ export type Spending = {
 	note: string;
 	date: string;
 }
+
+export type PendingCreateSpending = {
+	amount: number;
+	note: string;
+}

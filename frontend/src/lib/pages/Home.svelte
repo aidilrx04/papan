@@ -31,7 +31,7 @@
 	function onAdd(e: Event) {
 		e.preventDefault();
 
-		createSpending({ amount, note }).then(() => {
+		createSpending({ amount: Number(amount), note }).then(() => {
 			getSpendings().then((_sp) => (spendings = _sp));
 		});
 
