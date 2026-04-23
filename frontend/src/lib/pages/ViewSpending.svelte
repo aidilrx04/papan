@@ -17,15 +17,24 @@
 		date: "",
 		note: "",
 	});
+	let error = $state<any | null>(null);
+
+	$effect(() => {
+		console.log(error);
+	});
 
 	onMount(function () {
-		getSpending(spendingId).then(function (_spending) {
-			loading = false;
-			if (_spending === null) {
-				return;
-			}
-			spending = _spending;
-		});
+		getSpending(spendingId)
+			.then(function (_spending) {
+				if (_spending === null) {
+					throw new Error("Not Found");
+				}
+				spending = _spending;
+			})
+			.catch(handleFetchError)
+			.finally(() => {
+				loading = false;
+			});
 	});
 
 	let isDeleteModalShown = $state(false);
@@ -44,6 +53,14 @@
 		});
 		location.href = "/";
 	}
+
+	function handleFetchError(err: Error) {
+		error = error ?? {};
+		error.message = err.message;
+		if (err.message === "Failed to fetch") {
+			error.message = "Unable to connect to server.";
+		}
+	}
 </script>
 
 <div id="view-spending" class="h-screen flex flex-col">
@@ -53,7 +70,7 @@
 		<button
 			class="text-rose-400 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400"
 			onclick={showModal}
-			disabled={loading || spending === null}>Delete</button
+			disabled={loading || spending === null || error}>Delete</button
 		>
 	</div>
 	<section class="p-4 py-8 flex-1 flex flex-col">
@@ -67,12 +84,12 @@
 					</span>
 				</div>
 			{/if}
-			{#if !loading && spending === null}
-				<div class="not-found text-center text-gray-400 py-16 px-4">
-					<span>Not Found</span>
+			{#if !loading && error}
+				<div class="not-found text-center text-rose-400 py-16 px-4">
+					<span>{error.message}</span>
 				</div>
 			{/if}
-			{#if !loading && spending !== null}
+			{#if !loading && spending !== null && !error}
 				<div class="mb-8">
 					<span
 						class="uppercase font-semibold tracking-wide block mb-2 text-gray-400"
@@ -114,7 +131,7 @@
 	<div class="p-4">
 		<button
 			class="px-4 py-2.5 text-center block w-full rounded border-3 border-rose-800 text-rose-400 cursor-pointer font-semibold transition-colors duration-75 hover:bg-rose-800 hover:text-gray-100 active:text-gray-100 active:bg-rose-600 hover:border-rose-800 active:border-rose-600 disabled:cursor-not-allowed disabled:hover:bg-gray-700/25 disabled:text-gray-400 disabled:border-gray-600 disabled:bg-gray-700/25"
-			disabled={loading || spending === null}
+			disabled={loading || spending === null || error}
 			onclick={showModal}>Delete</button
 		>
 	</div>
