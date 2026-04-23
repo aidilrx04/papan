@@ -47,7 +47,7 @@
 		deleteSpending(spendingId).then((b) => {
 			console.log("deleted: ", b);
 		});
-		// location.href = "/";
+		location.href = "/";
 	}
 </script>
 
