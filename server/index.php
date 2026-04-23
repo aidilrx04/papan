@@ -7,7 +7,7 @@ function getSpendings()
 	global $conn;
 
 	$query = "SELECT * FROM spendings ORDER BY date DESC";
-	$result = $conn->execute_query($query);
+	$result = $conn->query($query);
 
 	return $result->fetch_all(MYSQLI_ASSOC);
 }
@@ -28,10 +28,7 @@ function createSpending($data)
 $action = $_SERVER['REQUEST_METHOD'];
 $parsed = null;
 
-if ($action === 'OPTIONS') {
-	echo json_encode(['message' => 'OK']);
-	exit;
-}
+
 
 if ($action !== 'GET') {
 	$parsed = json_decode(file_get_contents('php://input'), true);
@@ -46,6 +43,11 @@ $output = null;
 header("Content-Type: application/json", true, 200);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
+
+if ($action === 'OPTIONS') {
+	echo json_encode(['message' => 'OK']);
+	exit;
+}
 
 switch ($action) {
 	case "GET":
