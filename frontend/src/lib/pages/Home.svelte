@@ -54,18 +54,6 @@
 	function hideModal() {
 		isModalShown = false;
 	}
-
-	function viewSpending(e: MouseEvent) {
-		e.preventDefault();
-
-		const spendingId = (e.currentTarget as HTMLElement).dataset.id;
-
-		let newPath = `/spending/${spendingId}`;
-
-		history.pushState(null, "", newPath);
-
-		// console.log(history.state, history.length);
-	}
 </script>
 
 <main id="papan-app" class="p-4 pb-24 group {isModalShown ? 'show-modal' : ''}">
