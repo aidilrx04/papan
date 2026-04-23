@@ -1,6 +1,8 @@
+import type { Spending } from "./types";
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1';
 
-export async function getSpendings() {
+export async function getSpendings(): Promise<Spending[]> {
 	const res = await fetch(`${API_URL}/`);
 
 	return await res.json();
