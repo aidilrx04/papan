@@ -28,6 +28,11 @@ function createSpending($data)
 $action = $_SERVER['REQUEST_METHOD'];
 $parsed = null;
 
+if ($action === 'OPTIONS') {
+	echo json_encode(['message' => 'OK']);
+	exit;
+}
+
 if ($action !== 'GET') {
 	$parsed = json_decode(file_get_contents('php://input'), true);
 }

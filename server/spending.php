@@ -38,11 +38,16 @@ $id = $_GET['id'] ?? null;
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Header: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type');
 
 if (!$id) {
 	http_response_code(404);
 	echo json_encode(['message' => 'Not Found']);
+	exit;
+}
+
+if ($action === 'OPTIONS') {
+	echo json_encode(['message' => 'OK']);
 	exit;
 }
 
