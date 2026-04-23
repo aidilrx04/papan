@@ -11,9 +11,14 @@
 
 	onMount(function () {
 		getSpending(spendingId).then(function (_spending) {
-			_spending.date = new Date(_spending.date);
 			spending = _spending;
 			loading = false;
+
+			if (_spending === null) {
+				return;
+			}
+
+			_spending.date = new Date(_spending.date);
 		});
 	});
 
@@ -86,7 +91,13 @@
 						</svg>
 					</span>
 				</div>
-			{:else}
+			{/if}
+			{#if !loading && spending === null}
+				<div class="not-found text-center text-gray-400 py-16 px-4">
+					<span>Not Found</span>
+				</div>
+			{/if}
+			{#if !loading && spending !== null}
 				<div class="mb-8">
 					<span
 						class="uppercase font-semibold tracking-wide block mb-2 text-gray-400"
