@@ -4,13 +4,7 @@
 	import Modal from "../components/Modal.svelte";
 	import type { Spending } from "../types";
 	import Spinner from "../components/Spinner.svelte";
-
-	const formatter = new Intl.NumberFormat("ms-MY", {
-		currency: "MYR",
-		maximumFractionDigits: 2,
-		currencyDisplay: "symbol",
-		style: "currency",
-	});
+	import { currencyFormatter } from "../formatter";
 
 	let amountInputElement: HTMLInputElement | undefined = $state();
 
@@ -68,7 +62,7 @@
 			>{#if loading}
 				RM --.--
 			{:else}
-				{formatter.format(totalSpent)}
+				{currencyFormatter.format(totalSpent)}
 			{/if}</b
 		>
 		<span class="text-violet-400 font-semibold">RM 10.00 budget</span>
@@ -101,7 +95,7 @@
 							<span class="block flex-1">{s.note}</span>
 							<span
 								class="font-semibold text-rose-400 block min-w-24 text-right"
-								>- {formatter.format(s.amount)}</span
+								>- {currencyFormatter.format(s.amount)}</span
 							>
 						</div>
 					</a>
