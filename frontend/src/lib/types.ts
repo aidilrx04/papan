@@ -1,6 +1,6 @@
 export type Spending = {
 	id: number;
-	amount: number;
+	amount: string;
 	note: string;
 	date: string;
 }
