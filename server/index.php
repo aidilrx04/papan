@@ -28,8 +28,6 @@ function createSpending(array $data)
 $action = $_SERVER['REQUEST_METHOD'];
 $parsed = null;
 
-
-
 if ($action !== 'GET') {
 	$parsed = json_decode(file_get_contents('php://input'), true);
 }
@@ -57,6 +55,15 @@ switch ($action) {
 
 		break;
 	case "POST":
+		$amount = isset($parsed['amount']) ? $parsed['amount'] : null;
+		$note = isset($parsed['note']) ? $parsed['note'] : null;
+
+		if (!$amount || !$note) {
+			http_response_code(400);
+			$output = json_encode(['message' => "Invalid input. `amount` and `noted` fields are required"]);
+			break;
+		}
+
 		$success = createSpending($parsed);
 
 		if ($success) {
