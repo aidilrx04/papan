@@ -51,7 +51,7 @@ switch ($action) {
 	case "GET":
 		$spendings = getSpendings();
 
-		$output = json_encode($spendings);
+		$output = $spendings;
 
 		break;
 	case "POST":
@@ -60,14 +60,14 @@ switch ($action) {
 
 		if (!$amount || !$note) {
 			http_response_code(400);
-			$output = json_encode(['message' => "Invalid input. `amount` and `noted` fields are required"]);
+			$output = ['message' => "Invalid input. `amount` and `noted` fields are required"];
 			break;
 		}
 
 		// sanitize input
 		if (!is_numeric($amount)) {
 			http_response_code(400);
-			$output = json_encode(['message' => 'Invalid input. `amount` field required to be a numeric.']);
+			$output = ['message' => 'Invalid input. `amount` field required to be a numeric.'];
 			break;
 		}
 
@@ -87,13 +87,13 @@ switch ($action) {
 
 	default:
 		http_response_code(405);
-		$output = json_encode(['message' => 'Method Not Allowed']);
+		$output = ['message' => 'Method Not Allowed'];
 }
 
 
 mysqli_close($conn);
 
 
-echo $output;
+echo json_encode($output);
 
 exit;
