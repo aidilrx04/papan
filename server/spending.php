@@ -2,7 +2,7 @@
 
 require_once('database.php');
 
-function getSpending($id)
+function getSpending(int $id)
 {
 	global $conn;
 
@@ -20,7 +20,7 @@ function getSpending($id)
 	return $result->fetch_assoc();
 }
 
-function deleteSpending($id)
+function deleteSpending(int $id)
 {
 	global $conn;
 
