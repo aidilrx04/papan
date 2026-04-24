@@ -82,8 +82,10 @@ switch ($action) {
 
 		if ($success) {
 			http_response_code(200);
+			$output['message'] = 'Success';
 		} else {
 			http_response_code(400);
+			$output['message'] = 'Failed';
 		}
 		break;
 
