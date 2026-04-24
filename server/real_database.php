@@ -34,6 +34,20 @@ if (file_exists($file)) {
 	$name = $env['NAME'] ?? $name;
 }
 
-$conn = mysqli_connect($host, $user, $pass, $name);
+try {
+	$conn = mysqli_connect($host, $user, $pass, $name);
+} catch (Exception $e) {
+
+	http_response_code(500);
+	header('Content-Type: application/json');
+	header('Access-Control-Allow-Origin: *');
+	header('Access-Control-Allow-Headers: Content-Type');
+
+	echo json_encode([
+		'message' => 'Oops! Something went wrong. Please try again later.'
+	]);
+
+	exit;
+}
 
 $env = null;
