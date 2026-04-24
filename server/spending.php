@@ -53,7 +53,7 @@ if ($action === 'OPTIONS') {
 	exit;
 }
 
-if (!$action !== 'GET') {
+if ($action !== 'GET') {
 	$input = json_decode(file_get_contents('php://input'), true);
 }
 
