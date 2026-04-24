@@ -159,8 +159,9 @@
 							<span class="block flex-1">{s.note}</span>
 							<span
 								class="font-semibold text-rose-400 block min-w-24 text-right"
-								>- {currencyFormatter.format(
-									Number(s.amount),
+							>
+								{currencyFormatter.format(
+									Number(s.amount) * -1,
 								)}</span
 							>
 						</div>
