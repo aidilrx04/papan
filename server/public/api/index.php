@@ -1,7 +1,7 @@
 <?php
 
-require_once('database.php');
-require_once 'utilities.php';
+require_once 'database.php';
+require_once '../../utilities.php';
 
 function getSpendings()
 {
