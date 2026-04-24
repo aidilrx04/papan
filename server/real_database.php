@@ -1,5 +1,7 @@
 <?php
 
+require_once 'utilities.php';
+
 function parseEnv(string $file)
 {
 	$env = file_get_contents($file);
@@ -39,9 +41,7 @@ try {
 } catch (Exception $e) {
 
 	http_response_code(500);
-	header('Content-Type: application/json');
-	header('Access-Control-Allow-Origin: *');
-	header('Access-Control-Allow-Headers: Content-Type');
+	setApiHeader();
 
 	echo json_encode([
 		'message' => 'Oops! Something went wrong. Please try again later.'

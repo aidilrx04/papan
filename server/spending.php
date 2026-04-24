@@ -1,6 +1,7 @@
 <?php
 
 require_once('database.php');
+require_once 'utilities.php';
 
 function getSpending(int $id)
 {
@@ -38,9 +39,7 @@ $action = $_SERVER['REQUEST_METHOD'];
 $input = null;
 $id = $_GET['id'] ?? null;
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type');
+setApiHeader();
 
 if (!$id) {
 	http_response_code(404);

@@ -1,6 +1,7 @@
 <?php
 
 require_once('database.php');
+require_once 'utilities.php';
 
 function getSpendings()
 {
@@ -40,9 +41,7 @@ $output = [
 	'message' => ''
 ];
 
-header("Content-Type: application/json", true, 200);
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+setApiHeader();
 
 if ($action === 'OPTIONS') {
 	echo json_encode(['message' => 'OK']);
