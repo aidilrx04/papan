@@ -66,12 +66,12 @@ $output = null;
 switch ($action) {
 	case 'GET':
 		$spending = getSpending($id);
+		$output = $spending;
 
 		if ($spending === null) {
 			http_response_code(404);
+			$output = null;
 		}
-
-		$output = $spending;
 
 		break;
 
