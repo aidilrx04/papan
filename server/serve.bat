@@ -1,0 +1,1 @@
+cd public/api && php -S localhost:8000 && cd -
