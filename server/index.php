@@ -64,7 +64,19 @@ switch ($action) {
 			break;
 		}
 
-		$success = createSpending($parsed);
+		// sanitize input
+		if (!is_numeric($amount)) {
+			http_response_code(400);
+			$output = json_encode(['message' => 'Invalid input. `amount` field required to be a numeric.']);
+			break;
+		}
+
+		$validatedData = [
+			'amount' => $amount,
+			'note' => $note
+		];
+
+		$success = createSpending($validatedData);
 
 		if ($success) {
 			http_response_code(200);
