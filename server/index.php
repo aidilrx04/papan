@@ -36,7 +36,9 @@ if ($action === "POST" && isset($parsed['_method'])) {
 	$action = $parsed['_method'];
 }
 
-$output = null;
+$output = [
+	'message' => ''
+];
 
 header("Content-Type: application/json", true, 200);
 header("Access-Control-Allow-Origin: *");
@@ -60,14 +62,14 @@ switch ($action) {
 
 		if (!$amount || !$note) {
 			http_response_code(400);
-			$output = ['message' => "Invalid input. `amount` and `noted` fields are required"];
+			$output['message'] = "Invalid input. `amount` and `noted` fields are required";
 			break;
 		}
 
 		// sanitize input
 		if (!is_numeric($amount)) {
 			http_response_code(400);
-			$output = ['message' => 'Invalid input. `amount` field required to be a numeric.'];
+			$output['message'] = 'Invalid input. `amount` field required to be a numeric.';
 			break;
 		}
 
@@ -87,7 +89,7 @@ switch ($action) {
 
 	default:
 		http_response_code(405);
-		$output = ['message' => 'Method Not Allowed'];
+		$output['message'] = 'Method Not Allowed';
 }
 
 
