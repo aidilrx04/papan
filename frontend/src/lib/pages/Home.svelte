@@ -8,7 +8,6 @@
 
 	let amountInputElement: HTMLInputElement | undefined = $state();
 
-	let amount: string = $state("");
 	let note: string = $state("");
 
 	let loading = $state(true);
@@ -36,13 +35,14 @@
 	function onAdd(e: Event) {
 		e.preventDefault();
 
-		createSpending({ amount: Number(amount), note }).then(() => {
+		let realAmount = Number(amountBuffer) * 0.01;
+		createSpending({ amount: realAmount, note }).then(() => {
 			getSpendings()
 				.then((_sp) => (spendings = _sp))
 				.catch(handleGetSpendingError);
 		});
 
-		amount = "";
+		amountBuffer = "0";
 		note = "";
 	}
 
@@ -50,7 +50,6 @@
 
 	function showModal() {
 		isModalShown = true;
-		console.log(amountInputElement);
 		setTimeout(() => {
 			amountInputElement!.focus();
 		}, 50);
@@ -65,6 +64,47 @@
 		if (err.message === "Failed to fetch") {
 			error.message = "Unable to connect to server.";
 		}
+	}
+
+	const numberFormatter = new Intl.NumberFormat("ms-MY", {
+		maximumFractionDigits: 2,
+		minimumFractionDigits: 2,
+		style: "decimal",
+		trailingZeroDisplay: "auto",
+	});
+
+	let amountBuffer = $state("0");
+	let amountDisplay = $derived.by(() => {
+		return numberFormatter.format(Number(amountBuffer) * 0.01);
+	});
+
+	function handleAmountChange(e: KeyboardEvent) {
+		const { key } = e;
+
+		if (key === "Backspace") {
+			e.preventDefault();
+			if (amountBuffer.length <= 1) {
+				amountBuffer = "0";
+				return;
+			}
+
+			amountBuffer = amountBuffer.slice(0, -1);
+			return;
+		}
+
+		const allowed = "1234567890".split("");
+
+		if (allowed.includes(key)) {
+			amountBuffer += key;
+			e.preventDefault();
+			return;
+		}
+
+		if (["Tab", "Enter"].includes(key)) {
+			return;
+		}
+
+		e.preventDefault();
 	}
 </script>
 
@@ -166,13 +206,15 @@
 					>Amount</label
 				>
 				<input
-					class="block w-full px-4 py-2.5 bg-black/10 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600"
-					type="number"
-					bind:value={amount}
+					class="block w-full px-4 py-2.5 bg-black/10 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600 tracking-wide"
+					type="text"
+					inputmode="numeric"
 					name="amount"
 					id="amount"
 					autocomplete="off"
 					bind:this={amountInputElement}
+					value={amountDisplay}
+					onkeydown={handleAmountChange}
 				/>
 			</div>
 			<div class="mb-4">
