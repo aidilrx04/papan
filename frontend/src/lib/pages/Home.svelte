@@ -28,9 +28,7 @@
 
 	onMount(function () {
 		getSpendings()
-			.then((_spendings) => {
-				spendings = _spendings;
-			})
+			.then(setSpendings)
 			.catch(handleGetSpendingError)
 			.finally(() => {
 				loading = false;
@@ -42,9 +40,7 @@
 
 		let realAmount = Number(amountBuffer) * 0.01;
 		createSpending({ amount: realAmount, note }).then(() => {
-			getSpendings()
-				.then((_sp) => (spendings = _sp))
-				.catch(handleGetSpendingError);
+			getSpendings().then(setSpendings).catch(handleGetSpendingError);
 		});
 
 		amountBuffer = "0";
@@ -134,6 +130,10 @@
 		);
 
 		return diffInDays !== 0;
+	}
+
+	function setSpendings(_spendings: Spending[]) {
+		spendings = _spendings;
 	}
 </script>
 
