@@ -4,6 +4,12 @@
 	import ViewSpendingPage from "./lib/pages/ViewSpending.svelte";
 
 	let path = location.pathname;
+
+	const routes = {
+		"/": HomePage,
+		"/spending/:id": ViewSpendingPage,
+		"*": NotFound,
+	};
 </script>
 
 {#if path === "/"}
