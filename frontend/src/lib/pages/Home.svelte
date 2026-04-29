@@ -39,10 +39,8 @@
 
 	function showModal() {
 		isModalShown = true;
-		setTimeout(() => {
-			// amountInputElement!.focus();
-		}, 50);
 	}
+
 	function hideModal() {
 		isModalShown = false;
 	}
@@ -55,34 +53,8 @@
 		}
 	}
 
-	// svelte-ignore non_reactive_update
-	let currentDate: Date | null = null;
-
-	function setCurrentDate(date: Date) {
-		currentDate = new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate(),
-		);
-	}
-
-	function isDateDifferent(date: Date) {
-		const target = new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate(),
-		).getTime();
-		const diffInDays = Math.round(
-			(currentDate!.getTime() - target) / (1000 * 60 * 60 * 24),
-		);
-
-		return diffInDays !== 0;
-	}
-
 	function setSpendings(_spendings: Spending[]) {
 		spendings = _spendings;
-
-		groupSpendings(spendings);
 	}
 
 	async function onSpendingCreated(spending: PendingCreateSpending) {
