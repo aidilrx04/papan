@@ -4,12 +4,19 @@
 	import Modal from "../components/Modal.svelte";
 	import type { PendingCreateSpending, Spending } from "../types";
 	import Spinner from "../components/Spinner.svelte";
-	import { currencyFormatter } from "../formatter";
+	import {
+		currencyFormatter,
+		formatDateGroup,
+		groupDateFormatter,
+	} from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
 	import SpendingItem from "../components/SpendingItem.svelte";
 
 	let loading = $state(true);
 	let spendings: Spending[] = $state([]);
+	let spendingGroups = $derived.by(() =>
+		Object.entries(groupSpendings(spendings)),
+	);
 	let error = $state<any>(null);
 
 	let totalSpent = $derived.by(function () {
@@ -74,11 +81,40 @@
 
 	function setSpendings(_spendings: Spending[]) {
 		spendings = _spendings;
+
+		groupSpendings(spendings);
 	}
 
 	async function onSpendingCreated(spending: PendingCreateSpending) {
-		createSpending(spending);
+		createSpending(spending).then(() => {
+			getSpendings().then(setSpendings);
+		});
 		hideModal();
+	}
+
+	function normalizeDate(date: string) {
+		const d = new Date(date);
+		return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+	}
+
+	function groupSpendings(spendings: Spending[]) {
+		const grouped: {
+			[key: string]: Spending[];
+		} = {};
+		for (const spending of spendings) {
+			const date = groupDateFormatter.format(
+				normalizeDate(spending.date),
+			);
+
+			if (grouped[date] === undefined) {
+				grouped[date] = [spending];
+				continue;
+			}
+
+			grouped[date].push(spending);
+		}
+
+		return grouped;
 	}
 </script>
 
@@ -123,8 +159,16 @@
 		{/if}
 
 		<ul>
-			{#each spendings as spending (spending.id)}
-				<SpendingItem {spending} />
+			{#each spendingGroups as [date, s]}
+				<li
+					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 even:bg-black/25"
+				>
+					<span>{formatDateGroup(new Date(date))}</span>
+				</li>
+
+				{#each s as spending (spending.id)}
+					<SpendingItem {spending} />
+				{/each}
 			{/each}
 		</ul>
 	</section>
