@@ -1,15 +1,6 @@
 <script lang="ts">
-	import HomePage from "./lib/pages/Home.svelte";
-	import NotFound from "./lib/pages/NotFound.svelte";
-	import ViewSpendingPage from "./lib/pages/ViewSpending.svelte";
-
-	let path = location.pathname;
+	import { Router } from "sv-router";
+	import "./lib/router";
 </script>
 
-{#if path === "/"}
-	<HomePage />
-{:else if path.startsWith("/spending")}
-	<ViewSpendingPage />
-{:else}
-	<NotFound />
-{/if}
+<Router />
