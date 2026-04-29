@@ -51,3 +51,5 @@ try {
 }
 
 $env = null;
+
+usleep(250000);

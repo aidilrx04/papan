@@ -26,14 +26,31 @@
 		);
 	});
 
+	$inspect(loading, error, spendings).with(console.debug);
+
 	onMount(function () {
-		getSpendings()
-			.then(setSpendings)
-			.catch(handleGetSpendingError)
-			.finally(() => {
-				loading = false;
-			});
+		loadSpendings();
 	});
+
+	async function loadSpendings() {
+		loading = true;
+		error = null;
+
+		try {
+			const _spendings = await getSpendings();
+			spendings = _spendings;
+		} catch (e: unknown) {
+			console.debug(e);
+			const message = (e as Error).message;
+			if (message === "Failed to fetch") {
+				error = "Unable to connect to server";
+			} else {
+				error = "Something went wrong";
+			}
+		} finally {
+			loading = false;
+		}
+	}
 
 	let isModalShown = $state(false);
 
@@ -43,14 +60,6 @@
 
 	function hideModal() {
 		isModalShown = false;
-	}
-
-	function handleGetSpendingError(err: Error) {
-		error = error ?? {};
-		error.message = err.message;
-		if (err.message === "Failed to fetch") {
-			error.message = "Unable to connect to server.";
-		}
 	}
 
 	function setSpendings(_spendings: Spending[]) {
@@ -126,7 +135,7 @@
 
 		{#if !loading && error}
 			<div class="error text-center text-rose-400 py-16 px-4">
-				<span>{error.message}</span>
+				<span>{error}</span>
 			</div>
 		{/if}
 
