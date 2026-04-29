@@ -70,7 +70,9 @@
 
 <div id="view-spending" class="h-screen flex flex-col">
 	<div class="p-4 flex justify-between items-center">
-		<a href="/" onclick={goBack} class="text-sky-400">Back</a>
+		<button onclick={goBack} class="text-sky-400 cursor-pointer"
+			>Back</button
+		>
 		<h1 class="text-gray-100 font-semibold text-xl">Spending</h1>
 		<button
 			class="text-rose-400 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400"
