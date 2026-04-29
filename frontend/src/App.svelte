@@ -17,12 +17,12 @@
 		const path = location.pathname;
 		const routePaths = regexifyPaths(Object.keys(routes));
 
-		console.log(routePaths);
+		// console.log(routePaths);
 
 		for (const { path: _p, regex } of routePaths) {
-			console.log(_p, regex, regex.test(path));
+			// console.log(_p, regex, regex.test(path));
 			if (regex.test(path)) {
-				console.log("We should render", routes[_p]);
+				return routes[path];
 			}
 		}
 	}
