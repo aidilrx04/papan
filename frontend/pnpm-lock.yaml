@@ -11,6 +11,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@8.0.8(@types/node@24.12.2)(jiti@2.6.1))
+      sv-router:
+        specifier: ^0.16.0
+        version: 0.16.0(svelte@5.55.4)
       tailwindcss:
         specifier: ^4.2.2
         version: 4.2.2
@@ -528,6 +531,12 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+  sv-router@0.16.0:
+    resolution: {integrity: sha512-x5SiV6Hp6GRmGXAgu1H4g/x9oKhVIMeUwYodA+QF1JdzcWsCXsOGyWjcwjSNR+Mw2iiculGPynpys8MfA6PJRA==}
+    hasBin: true
+    peerDependencies:
+      svelte: ^5
+
   svelte-check@4.4.6:
     resolution: {integrity: sha512-kP1zG81EWaFe9ZyTv4ZXv44Csi6Pkdpb7S3oj6m+K2ec/IcDg/a8LsFsnVLqm2nxtkSwsd5xPj/qFkTBgXHXjg==}
     engines: {node: '>= 18.0.0'}
@@ -1015,6 +1024,11 @@ snapshots:
       mri: 1.2.0
 
   source-map-js@1.2.1: {}
+
+  sv-router@0.16.0(svelte@5.55.4):
+    dependencies:
+      esm-env: 1.2.2
+      svelte: 5.55.4
 
   svelte-check@4.4.6(picomatch@4.0.4)(svelte@5.55.4)(typescript@6.0.3):
     dependencies:
