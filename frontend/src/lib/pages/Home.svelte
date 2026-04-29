@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import { createSpending, getSpendings } from "../api";
 	import Modal from "../components/Modal.svelte";
-	import type { Spending } from "../types";
+	import type { PendingCreateSpending, Spending } from "../types";
 	import Spinner from "../components/Spinner.svelte";
 	import {
 		currencyFormatter,
@@ -10,10 +10,7 @@
 		formatDateGroup,
 		groupDateFormatter,
 	} from "../formatter";
-
-	let amountInputElement: HTMLInputElement | undefined = $state();
-
-	let note: string = $state("");
+	import AddSpendingForm from "../components/AddSpendingForm.svelte";
 
 	let loading = $state(true);
 	let spendings: Spending[] = $state([]);
@@ -35,24 +32,12 @@
 			});
 	});
 
-	function onAdd(e: Event) {
-		e.preventDefault();
-
-		let realAmount = Number(amountBuffer) * 0.01;
-		createSpending({ amount: realAmount, note }).then(() => {
-			getSpendings().then(setSpendings).catch(handleGetSpendingError);
-		});
-
-		amountBuffer = "0";
-		note = "";
-	}
-
 	let isModalShown = $state(false);
 
 	function showModal() {
 		isModalShown = true;
 		setTimeout(() => {
-			amountInputElement!.focus();
+			// amountInputElement!.focus();
 		}, 50);
 	}
 	function hideModal() {
@@ -65,47 +50,6 @@
 		if (err.message === "Failed to fetch") {
 			error.message = "Unable to connect to server.";
 		}
-	}
-
-	const numberFormatter = new Intl.NumberFormat("ms-MY", {
-		maximumFractionDigits: 2,
-		minimumFractionDigits: 2,
-		style: "decimal",
-		trailingZeroDisplay: "auto",
-	});
-
-	let amountBuffer = $state("0");
-	let amountDisplay = $derived.by(() => {
-		return numberFormatter.format(Number(amountBuffer) * 0.01);
-	});
-
-	function handleAmountChange(e: KeyboardEvent) {
-		const { key } = e;
-
-		if (key === "Backspace") {
-			e.preventDefault();
-			if (amountBuffer.length <= 1) {
-				amountBuffer = "0";
-				return;
-			}
-
-			amountBuffer = amountBuffer.slice(0, -1);
-			return;
-		}
-
-		const allowed = "1234567890".split("");
-
-		if (allowed.includes(key)) {
-			amountBuffer += key;
-			e.preventDefault();
-			return;
-		}
-
-		if (["Tab", "Enter"].includes(key)) {
-			return;
-		}
-
-		e.preventDefault();
 	}
 
 	// svelte-ignore non_reactive_update
@@ -134,6 +78,11 @@
 
 	function setSpendings(_spendings: Spending[]) {
 		spendings = _spendings;
+	}
+
+	async function onSpendingCreated(spending: PendingCreateSpending) {
+		createSpending(spending);
+		hideModal();
 	}
 </script>
 
@@ -237,57 +186,6 @@
 
 {#if isModalShown}
 	<Modal {hideModal}>
-		<form action="" onsubmit={onAdd}>
-			<h2 class="text-2xl font-semibold mb-4">Add Spending</h2>
-			<div class="mb-4">
-				<label
-					for="amount"
-					class="mb-1 block text-base uppercase font-semibold"
-					>Amount</label
-				>
-				<input
-					class="block w-full px-4 py-2.5 bg-black/10 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600 tracking-wide"
-					type="text"
-					inputmode="numeric"
-					name="amount"
-					id="amount"
-					autocomplete="off"
-					bind:this={amountInputElement}
-					value={amountDisplay}
-					onkeydown={handleAmountChange}
-				/>
-			</div>
-			<div class="mb-4">
-				<label
-					for="amount"
-					class="mb-1 block text-base uppercase font-semibold"
-					>Label</label
-				>
-				<input
-					class="block w-full px-4 py-2.5 bg-black/10 hover:bg-black/5 rounded text-gray-50 font-semibold border-2 border-gray-600 hover:border-violet-600 focus:border-violet-600 focus:outline-2 outline-violet-600"
-					type="text"
-					bind:value={note}
-					name="label"
-					id="label"
-					autocomplete="on"
-				/>
-			</div>
-			<div class="flex justify-end items-center gap-4">
-				<button
-					onclick={hideModal}
-					class="px-4 py-2.5 cursor-pointer uppercase font-semibold hover:bg-black/15 active:bg-black/25 text-gray-400 rounded hover:text-gray-100 transition-colors duration-75"
-					type="button">Cancel</button
-				>
-				<button
-					onclick={(e) => {
-						onAdd(e);
-						hideModal();
-					}}
-					class="font-semibold text-lg flex items-center gap-2 uppercase bg-violet-600 text-gray-50 px-8 py-2.5 rounded justify-center hover:bg-violet-500 active:bg-violet-700 cursor-pointer transition-colors duration-75"
-				>
-					<span>Add</span>
-				</button>
-			</div>
-		</form>
+		<AddSpendingForm {hideModal} {onSpendingCreated} />
 	</Modal>
 {/if}
