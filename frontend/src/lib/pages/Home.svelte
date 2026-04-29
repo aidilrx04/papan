@@ -4,13 +4,9 @@
 	import Modal from "../components/Modal.svelte";
 	import type { PendingCreateSpending, Spending } from "../types";
 	import Spinner from "../components/Spinner.svelte";
-	import {
-		currencyFormatter,
-		dateFormatter,
-		formatDateGroup,
-		groupDateFormatter,
-	} from "../formatter";
+	import { currencyFormatter } from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
+	import SpendingItem from "../components/SpendingItem.svelte";
 
 	let loading = $state(true);
 	let spendings: Spending[] = $state([]);
@@ -127,34 +123,8 @@
 		{/if}
 
 		<ul>
-			{#each spendings as s (s.id)}
-				{@const date = new Date(s.date)}
-				{#if currentDate === null || (currentDate !== null && isDateDifferent(date))}
-					{setCurrentDate(date)}
-					<li
-						class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 even:bg-black/25"
-					>
-						<span>{formatDateGroup(date)}</span>
-					</li>
-				{/if}
-
-				<li class="even:bg-black/25">
-					<a
-						href={`/spending/${s.id}`}
-						class=" p-4 hover:bg-black/35 active:bg-black/35 focus:bg-black/35 cursor-pointer transition-colors block"
-					>
-						<div class="flex items-center justify-between">
-							<span class="block flex-1">{s.note}</span>
-							<span
-								class="font-semibold text-rose-400 block min-w-24 text-right"
-							>
-								{currencyFormatter.format(
-									Number(s.amount) * -1,
-								)}</span
-							>
-						</div>
-					</a>
-				</li>
+			{#each spendings as spending (spending.id)}
+				<SpendingItem {spending} />
 			{/each}
 		</ul>
 	</section>
