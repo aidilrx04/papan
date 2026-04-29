@@ -9,3 +9,7 @@ export type PendingCreateSpending = {
 	amount: number;
 	note: string;
 }
+
+export type SpendingGroups = {
+	[date: string]: Spending[]
+}

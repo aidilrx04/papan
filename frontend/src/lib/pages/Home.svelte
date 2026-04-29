@@ -2,7 +2,11 @@
 	import { onMount } from "svelte";
 	import { createSpending, getSpendings } from "../api";
 	import Modal from "../components/Modal.svelte";
-	import type { PendingCreateSpending, Spending } from "../types";
+	import {
+		type SpendingGroups,
+		type PendingCreateSpending,
+		type Spending,
+	} from "../types";
 	import Spinner from "../components/Spinner.svelte";
 	import {
 		currencyFormatter,
@@ -13,20 +17,12 @@
 	import SpendingItem from "../components/SpendingItem.svelte";
 
 	let loading = $state(true);
-	let spendings: Spending[] = $state([]);
-	let spendingGroups = $derived.by(() =>
-		Object.entries(groupSpendings(spendings)),
-	);
+	let spendingGroups = $state<SpendingGroups>({});
 	let error = $state<any>(null);
 
-	let totalSpent = $derived.by(function () {
-		return spendings.reduce(
-			(carry, curr) => carry + Number(curr.amount),
-			0,
-		);
-	});
+	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingGroups));
 
-	$inspect(loading, error, spendings).with(console.debug);
+	$inspect(loading, error, spendingGroups).with(console.debug);
 
 	onMount(function () {
 		loadSpendings();
@@ -37,8 +33,9 @@
 		error = null;
 
 		try {
-			const _spendings = await getSpendings();
-			spendings = _spendings;
+			const spendings = await getSpendings();
+
+			spendingGroups = groupSpendings(spendings);
 		} catch (e: unknown) {
 			console.debug(e);
 			const message = (e as Error).message;
@@ -63,7 +60,14 @@
 	}
 
 	function setSpendings(_spendings: Spending[]) {
-		spendings = _spendings;
+		// spendings = _spendings;
+	}
+
+	function calculateTotalSpendings(spendingGroups: SpendingGroups): number {
+		const values = Object.values(spendingGroups).flat();
+		return values.reduce<number>(function (carry, sp) {
+			return carry + Number(sp.amount);
+		}, 0);
 	}
 
 	async function onSpendingCreated(spending: PendingCreateSpending) {
@@ -97,6 +101,10 @@
 
 		return grouped;
 	}
+
+	function isSpendingEmpty() {
+		return Object.keys(spendingGroups).length === 0;
+	}
 </script>
 
 <main id="papan-app" class="p-4 pb-24">
@@ -127,7 +135,7 @@
 			</div>
 		{/if}
 
-		{#if !loading && spendings.length === 0 && !error}
+		{#if !loading && isSpendingEmpty() && !error}
 			<div class="empty-spendings text-center text-gray-400 py-16 px-4">
 				<span>No spending record</span>
 			</div>
@@ -140,7 +148,7 @@
 		{/if}
 
 		<ul>
-			{#each spendingGroups as [date, s]}
+			{#each Object.entries(spendingGroups) as [date, s]}
 				<li
 					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 even:bg-black/25"
 				>
