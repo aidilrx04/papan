@@ -19,7 +19,7 @@
 
 	let loading = $state(true);
 	let spendingGroups = $state<SpendingGroups>({});
-	let b = $derived.by(() =>
+	let displaySpendings = $derived.by(() =>
 		Object.entries(spendingGroups).sort(([d1], [d2]) => {
 			return new Date(d2).getTime() - new Date(d1).getTime();
 		}),
@@ -27,8 +27,6 @@
 	let error = $state<any>(null);
 
 	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingGroups));
-
-	$inspect(loading, error, spendingGroups, b);
 
 	onMount(function () {
 		loadSpendings();
@@ -83,23 +81,21 @@
 			note: spending.note,
 			date: date,
 		};
-		const si = createSpendingItem(newSpending, false);
+		const spendingItem = createSpendingItem(newSpending, false);
 
 		if (spendingGroups[date] === undefined) {
 			spendingGroups[date] = [];
 		}
 
-		spendingGroups[date].unshift(si);
-		let p = spendingGroups[date][0];
+		spendingGroups[date].unshift(spendingItem);
+		let proxiedSpending = spendingGroups[date][0];
 
 		hideModal();
 
-		const b = await createSpending(spending);
+		const newCreatedSpending = await createSpending(spending);
 
-		console.log(b);
-
-		p.isSaved = true;
-		p.spending = b;
+		proxiedSpending.isSaved = true;
+		proxiedSpending.spending = newCreatedSpending;
 
 		console.log(spendingGroups[date][0]);
 	}
@@ -186,14 +182,14 @@
 		{/if}
 
 		<ul>
-			{#each b as [date, s]}
+			{#each displaySpendings as [date, spendings]}
 				<li
 					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 even:bg-black/25"
 				>
 					<span>{formatDateGroup(new Date(date))}</span>
 				</li>
 
-				{#each s as spending (spending.spending.id)}
+				{#each spendings as spending (spending.spending.id)}
 					<SpendingItemComponent item={spending} />
 				{/each}
 			{/each}

@@ -52,4 +52,4 @@ try {
 
 $env = null;
 
-usleep(1000000);
+usleep(.0001 * 1000 * 1000);
