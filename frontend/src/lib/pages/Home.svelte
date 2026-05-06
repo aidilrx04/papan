@@ -102,6 +102,7 @@
 			proxiedSpending.isSaved = false;
 			proxiedSpending.errorMessage = "Failed to save.";
 			// proxiedSpending.spending.id = -1 * Math.random();
+			storeSpendingLocally(newSpending);
 		}
 	}
 
@@ -143,6 +144,19 @@
 			spending,
 			isSaved,
 		};
+	}
+
+	function loadStoredSpendings() {
+		const stored = localStorage.getItem("papan-pending");
+		if (!stored) return [];
+
+		return JSON.parse(stored) as Spending[];
+	}
+	function storeSpendingLocally(spending: Spending) {
+		const stored = loadStoredSpendings();
+		stored.push(spending);
+
+		localStorage.setItem("papan-pending", JSON.stringify(stored));
 	}
 </script>
 
