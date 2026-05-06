@@ -28,7 +28,35 @@
 
 	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingGroups));
 
-	onMount(function () {
+	onMount(async function () {
+		loadSpendings();
+
+		const storedSpendings = loadStoredSpendings();
+		let hasPendingItems = storedSpendings.length !== 0;
+
+		if (hasPendingItems === false) return;
+
+		const indexsRemains: number[] = [];
+
+		// save each
+		for (let i = 0; i < storedSpendings.length; i++) {
+			const spending = storedSpendings[i];
+			const res = await createSpending({
+				amount: Number(spending.amount),
+				note: spending.note,
+			});
+
+			if (!res) {
+				indexsRemains.push(i);
+				continue;
+			}
+		}
+
+		const leftovers = storedSpendings.filter((_, i) =>
+			indexsRemains.includes(i),
+		);
+
+		localStorage.setItem("papan-pending", JSON.stringify(leftovers));
 		loadSpendings();
 	});
 

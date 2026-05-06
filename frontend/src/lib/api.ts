@@ -8,7 +8,7 @@ export async function getSpendings(): Promise<Spending[]> {
 	return await res.json();
 }
 
-export async function createSpending(data: PendingCreateSpending) {
+export async function createSpending(data: PendingCreateSpending): Promise<Spending | false> {
 	const res = await fetch(`${API_URL}/`, {
 		method: "POST",
 		body: JSON.stringify({
