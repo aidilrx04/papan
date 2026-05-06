@@ -94,8 +94,15 @@
 
 		const newCreatedSpending = await createSpending(spending);
 
-		proxiedSpending.isSaved = true;
-		proxiedSpending.spending = newCreatedSpending;
+		if (newCreatedSpending) {
+			proxiedSpending.isSaved = true;
+			proxiedSpending.spending = newCreatedSpending;
+			proxiedSpending.errorMessage = undefined;
+		} else {
+			proxiedSpending.isSaved = false;
+			proxiedSpending.errorMessage = "Failed to save.";
+			// proxiedSpending.spending.id = -1 * Math.random();
+		}
 	}
 
 	function normalizeDate(date: string) {

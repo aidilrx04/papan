@@ -17,4 +17,5 @@ export type SpendingGroups = {
 export type SpendingItem = {
 	isSaved: boolean;
 	spending: Spending;
+	errorMessage?: string
 }
