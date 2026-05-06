@@ -41,7 +41,7 @@ $id = $_GET['id'] ?? null;
 
 setApiHeader();
 
-if (!$id) {
+if (!$id || !is_numeric($id)) {
 	http_response_code(404);
 	echo json_encode(['message' => 'Not Found']);
 	exit;
