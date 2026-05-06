@@ -21,7 +21,9 @@ export async function createSpending(data: PendingCreateSpending) {
 		}
 	});
 
-	return res.status;
+	if (res.status !== 200) return false;
+
+	return (await res.json())?.spending;
 }
 
 export async function getSpending(id: number): Promise<Spending | null> {

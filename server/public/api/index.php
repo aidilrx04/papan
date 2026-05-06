@@ -22,7 +22,11 @@ function createSpending(array $data)
 
 	$stmt->bind_param('ds', $data['amount'], $data['note']);
 
-	return $stmt->execute();
+	$success = $stmt->execute();
+
+	if (!$success) return false;
+
+	return $stmt->insert_id;
 }
 
 
@@ -77,15 +81,21 @@ switch ($action) {
 			'note' => $note
 		];
 
-		$success = createSpending($validatedData);
+		$idOrFail = createSpending($validatedData);
 
-		if ($success) {
-			http_response_code(200);
-			$output['message'] = 'Success';
-		} else {
+		if ($idOrFail === false) {
 			http_response_code(400);
 			$output['message'] = 'Failed';
+			break;
 		}
+
+		$newSpending = getSpending($idOrFail);
+
+		http_response_code(200);
+		$output['message'] = 'Success';
+		$output['spending'] = $newSpending;
+
+
 		break;
 
 	default:

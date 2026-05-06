@@ -3,6 +3,7 @@
 	import { createSpending, getSpendings } from "../api";
 	import Modal from "../components/Modal.svelte";
 	import {
+		type SpendingItem,
 		type SpendingGroups,
 		type PendingCreateSpending,
 		type Spending,
@@ -14,15 +15,20 @@
 		groupDateFormatter,
 	} from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
-	import SpendingItem from "../components/SpendingItem.svelte";
+	import SpendingItemComponent from "../components/SpendingItem.svelte";
 
 	let loading = $state(true);
 	let spendingGroups = $state<SpendingGroups>({});
+	let b = $derived.by(() =>
+		Object.entries(spendingGroups).sort(([d1], [d2]) => {
+			return new Date(d2).getTime() - new Date(d1).getTime();
+		}),
+	);
 	let error = $state<any>(null);
 
 	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingGroups));
 
-	$inspect(loading, error, spendingGroups).with(console.debug);
+	$inspect(loading, error, spendingGroups, b);
 
 	onMount(function () {
 		loadSpendings();
@@ -59,22 +65,43 @@
 		isModalShown = false;
 	}
 
-	function setSpendings(_spendings: Spending[]) {
-		// spendings = _spendings;
-	}
-
 	function calculateTotalSpendings(spendingGroups: SpendingGroups): number {
 		const values = Object.values(spendingGroups).flat();
 		return values.reduce<number>(function (carry, sp) {
-			return carry + Number(sp.amount);
+			return carry + Number(sp.spending.amount);
 		}, 0);
 	}
 
 	async function onSpendingCreated(spending: PendingCreateSpending) {
-		createSpending(spending).then(() => {
-			getSpendings().then(setSpendings);
-		});
+		const id = Math.random() * -1;
+		const date = groupDateFormatter.format(
+			normalizeDate(new Date().toISOString()),
+		);
+		const newSpending = {
+			id,
+			amount: spending.amount.toString(),
+			note: spending.note,
+			date: date,
+		};
+		const si = createSpendingItem(newSpending, false);
+
+		if (spendingGroups[date] === undefined) {
+			spendingGroups[date] = [];
+		}
+
+		spendingGroups[date].unshift(si);
+		let p = spendingGroups[date][0];
+
 		hideModal();
+
+		const b = await createSpending(spending);
+
+		console.log(b);
+
+		p.isSaved = true;
+		p.spending = b;
+
+		console.log(spendingGroups[date][0]);
 	}
 
 	function normalizeDate(date: string) {
@@ -82,21 +109,22 @@
 		return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 	}
 
-	function groupSpendings(spendings: Spending[]) {
-		const grouped: {
-			[key: string]: Spending[];
-		} = {};
+	function groupSpendings(
+		spendings: Spending[],
+		isSaved = true,
+	): SpendingGroups {
+		const grouped: SpendingGroups = {};
+
 		for (const spending of spendings) {
 			const date = groupDateFormatter.format(
 				normalizeDate(spending.date),
 			);
 
 			if (grouped[date] === undefined) {
-				grouped[date] = [spending];
-				continue;
+				grouped[date] = [];
 			}
 
-			grouped[date].push(spending);
+			grouped[date].push(createSpendingItem(spending, isSaved));
 		}
 
 		return grouped;
@@ -104,6 +132,16 @@
 
 	function isSpendingEmpty() {
 		return Object.keys(spendingGroups).length === 0;
+	}
+
+	function createSpendingItem(
+		spending: Spending,
+		isSaved: boolean,
+	): SpendingItem {
+		return {
+			spending,
+			isSaved,
+		};
 	}
 </script>
 
@@ -148,15 +186,15 @@
 		{/if}
 
 		<ul>
-			{#each Object.entries(spendingGroups) as [date, s]}
+			{#each b as [date, s]}
 				<li
 					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 even:bg-black/25"
 				>
 					<span>{formatDateGroup(new Date(date))}</span>
 				</li>
 
-				{#each s as spending (spending.id)}
-					<SpendingItem {spending} />
+				{#each s as spending (spending.spending.id)}
+					<SpendingItemComponent item={spending} />
 				{/each}
 			{/each}
 		</ul>

@@ -3,23 +3,6 @@
 require_once('database.php');
 require_once '../../utilities.php';
 
-function getSpending(int $id)
-{
-	global $conn;
-
-	$query = "SELECT * FROM spendings WHERE id = ?";
-	$stmt = $conn->prepare($query);
-
-	$stmt->bind_param('i', $id);
-
-	$stmt->execute();
-
-	$result = $stmt->get_result();
-
-	if ($result->num_rows === 0) return null;
-
-	return $result->fetch_assoc();
-}
 
 function deleteSpending(int $id)
 {
