@@ -12,12 +12,22 @@
 	let spending = $derived.by(() => item.spending);
 
 	$inspect(item);
+
+	function isUnclickable() {
+		return item.errorMessage || item.isSaved === false;
+	}
 </script>
 
 <li class="even:bg-black/25">
 	<a
-		href={`/spending/${spending.id}`}
+		href={`/spending/${item.isSaved ? spending.id : "#pending"}`}
 		class=" p-4 hover:bg-black/35 active:bg-black/35 focus:bg-black/35 cursor-pointer transition-colors block"
+		onclick={(e) => {
+			if (isUnclickable()) {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+			}
+		}}
 	>
 		<div class="flex items-center justify-between">
 			<div class="w-full flex items-center">
