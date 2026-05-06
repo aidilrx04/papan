@@ -96,8 +96,6 @@
 
 		proxiedSpending.isSaved = true;
 		proxiedSpending.spending = newCreatedSpending;
-
-		console.log(spendingGroups[date][0]);
 	}
 
 	function normalizeDate(date: string) {
