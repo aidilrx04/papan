@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { currencyFormatter } from "../formatter";
-	import type { Spending, SpendingItem } from "../types";
+	import type { Spending, SpendingItemDetail } from "../types";
 	import Spinner from "./Spinner.svelte";
 
 	let {
 		item,
 	}: {
-		item: SpendingItem;
+		item: SpendingItemDetail;
 	} = $props();
 
 	let spending = $derived.by(() => item.spending);

@@ -3,10 +3,10 @@
 	import { createSpending, getSpendings } from "../api";
 	import Modal from "../components/Modal.svelte";
 	import {
-		type SpendingItem,
 		type SpendingGroups,
 		type PendingCreateSpending,
 		type Spending,
+		type SpendingItemDetail,
 	} from "../types";
 	import Spinner from "../components/Spinner.svelte";
 	import {
@@ -15,7 +15,7 @@
 		groupDateFormatter,
 	} from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
-	import SpendingItemComponent from "../components/SpendingItem.svelte";
+	import SpendingItem from "../components/SpendingItem.svelte";
 
 	let loading = $state(true);
 	let spendingGroups = $state<SpendingGroups>({});
@@ -167,7 +167,7 @@
 	function createSpendingItem(
 		spending: Spending,
 		isSaved: boolean,
-	): SpendingItem {
+	): SpendingItemDetail {
 		return {
 			spending,
 			isSaved,
@@ -237,7 +237,7 @@
 				</li>
 
 				{#each spendings as spending (spending.spending.id)}
-					<SpendingItemComponent item={spending} />
+					<SpendingItem item={spending} />
 				{/each}
 			{/each}
 		</ul>

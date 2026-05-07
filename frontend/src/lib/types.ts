@@ -11,10 +11,10 @@ export type PendingCreateSpending = {
 }
 
 export type SpendingGroups = {
-	[date: string]: SpendingItem[]
+	[date: string]: SpendingItemDetail[]
 }
 
-export type SpendingItem = {
+export type SpendingItemDetail = {
 	isSaved: boolean;
 	spending: Spending;
 	errorMessage?: string
