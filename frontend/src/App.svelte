@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Router } from "sv-router";
 	import "./lib/router";
+	import "./lib/db";
 
 	if ("serviceWorker" in navigator) {
 		window.addEventListener("load", () => {
