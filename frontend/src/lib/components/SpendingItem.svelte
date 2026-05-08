@@ -11,7 +11,7 @@
 
 	let spending = $derived.by(() => item.spending);
 
-	$inspect(item);
+	// $inspect(item);
 
 	function isUnclickable() {
 		return item.errorMessage || item.isSaved === false;
