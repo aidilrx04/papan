@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
+    "idb": "^8.0.3",
     "sv-router": "^0.16.0",
     "tailwindcss": "^4.2.2"
   }
