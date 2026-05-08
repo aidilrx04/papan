@@ -18,16 +18,10 @@
 	}
 </script>
 
-<li class="even:bg-black/25">
+<li class="odd:bg-black/25">
 	<a
-		href={`/spending/${item.isSaved ? spending.id : "#pending"}`}
+		href={`/spending/${item.isSaved ? spending.id : "#pending"}${item.isSaved === false ? "?local=1" : ""}`}
 		class=" p-4 hover:bg-black/35 active:bg-black/35 focus:bg-black/35 cursor-pointer transition-colors block"
-		onclick={(e) => {
-			if (isUnclickable()) {
-				e.preventDefault();
-				e.stopImmediatePropagation();
-			}
-		}}
 	>
 		<div class="flex items-center justify-between">
 			<div class="w-full flex items-center">

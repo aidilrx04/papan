@@ -18,20 +18,27 @@
 	import SpendingItem from "../components/SpendingItem.svelte";
 
 	let loading = $state(true);
-	let spendingGroups = $state<SpendingGroups>({});
-	let displaySpendings = $derived.by(() =>
-		Object.entries(spendingGroups).sort(([d1], [d2]) => {
-			return new Date(d2).getTime() - new Date(d1).getTime();
-		}),
-	);
+	let spendingItems = $state<SpendingItemDetail[]>([]);
 	let error = $state<any>(null);
 
-	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingGroups));
+	let groupedSpendingItems = $derived.by(() =>
+		spendingItems.reduce<{
+			[date: string]: SpendingItemDetail[];
+		}>((carry, curr) => {
+			if (!carry[curr.group]) carry[curr.group] = [];
+			carry[curr.group].push(curr);
+			return carry;
+		}, {}),
+	);
+
+	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingItems));
+
+	let isOnline = $state(true);
 
 	onMount(async function () {
 		loadSpendings();
 
-		const storedSpendings = loadStoredSpendings();
+		const storedSpendings = loadLocallyStoredSpendings();
 		let hasPendingItems = storedSpendings.length !== 0;
 
 		if (hasPendingItems === false) return;
@@ -63,21 +70,32 @@
 	async function loadSpendings() {
 		loading = true;
 		error = null;
+		let spendings: Spending[] = [];
+		let isSaved = false;
 
 		try {
-			const spendings = await getSpendings();
-
-			spendingGroups = groupSpendings(spendings);
+			spendings = await getSpendings();
+			isSaved = true;
+			isOnline = true;
 		} catch (e: unknown) {
 			console.debug(e);
-			const message = (e as Error).message;
-			if (message === "Failed to fetch") {
-				error = "Unable to connect to server";
-			} else {
-				error = "Something went wrong";
-			}
+			// const message = (e as Error).message;
+			// if (message === "Failed to fetch") {
+			// 	error = "Unable to connect to server";
+			// } else {
+			// 	error = "Something went wrong";
+			// }
+			console.warn("Unable to connect to server.");
+			// load local spendings
+			spendings = loadLocallyStoredSpendings();
+			isSaved = false;
+			isOnline = false;
 		} finally {
 			loading = false;
+		}
+
+		for (const spending of spendings) {
+			spendingItems.push(createSpendingItem(spending, isSaved));
 		}
 	}
 
@@ -91,11 +109,16 @@
 		isModalShown = false;
 	}
 
-	function calculateTotalSpendings(spendingGroups: SpendingGroups): number {
-		const values = Object.values(spendingGroups).flat();
-		return values.reduce<number>(function (carry, sp) {
-			return carry + Number(sp.spending.amount);
-		}, 0);
+	function calculateTotalSpendings(
+		spendingItems: SpendingItemDetail[],
+	): number {
+		let total = 0;
+
+		for (const spendingItem of spendingItems) {
+			total += Number(spendingItem.spending.amount);
+		}
+
+		return total;
 	}
 
 	async function onSpendingCreated(spending: PendingCreateSpending) {
@@ -111,27 +134,43 @@
 		};
 		const spendingItem = createSpendingItem(newSpending, false);
 
-		if (spendingGroups[date] === undefined) {
-			spendingGroups[date] = [];
-		}
-
-		spendingGroups[date].unshift(spendingItem);
-		let proxiedSpending = spendingGroups[date][0];
+		spendingItems.unshift(spendingItem);
 
 		hideModal();
 
-		const newCreatedSpending = await createSpending(spending);
+		const spendingProxy = spendingItems[0];
 
-		if (newCreatedSpending) {
-			proxiedSpending.isSaved = true;
-			proxiedSpending.spending = newCreatedSpending;
-			proxiedSpending.errorMessage = undefined;
+		if (isOnline) {
+			const res = await onlineSave(newSpending);
+			if (!res) {
+				storeSpendingLocally(newSpending);
+			}
+			spendingProxy.isSaved = false;
+			spendingProxy.errorMessage = "Failed to save";
 		} else {
-			proxiedSpending.isSaved = false;
-			proxiedSpending.errorMessage = "Failed to save.";
-			// proxiedSpending.spending.id = -1 * Math.random();
-			storeSpendingLocally(newSpending);
+			const res = await localSave(newSpending);
+			spendingProxy.isSaved = false;
+			spendingProxy.errorMessage = "Locally saved";
 		}
+		// if (spendingGroups[date] === undefined) {
+		// 	spendingGroups[date] = [];
+		// }
+
+		// spendingGroups[date].unshift(spendingItem);
+		// let proxiedSpending = spendingGroups[date][0];
+
+		// const newCreatedSpending = await createSpending(spending);
+
+		// if (newCreatedSpending) {
+		// 	proxiedSpending.isSaved = true;
+		// 	proxiedSpending.spending = newCreatedSpending;
+		// 	proxiedSpending.errorMessage = undefined;
+		// } else {
+		// 	proxiedSpending.isSaved = false;
+		// 	proxiedSpending.errorMessage = "Failed to save.";
+		// 	// proxiedSpending.spending.id = -1 * Math.random();
+		// 	storeSpendingLocally(newSpending);
+		// }
 	}
 
 	function normalizeDate(date: string) {
@@ -161,7 +200,7 @@
 	}
 
 	function isSpendingEmpty() {
-		return Object.keys(spendingGroups).length === 0;
+		return spendingItems.length === 0;
 	}
 
 	function createSpendingItem(
@@ -171,20 +210,35 @@
 		return {
 			spending,
 			isSaved,
+			group: groupDateFormatter.format(normalizeDate(spending.date)),
 		};
 	}
 
-	function loadStoredSpendings() {
+	function loadLocallyStoredSpendings() {
 		const stored = localStorage.getItem("papan-pending");
 		if (!stored) return [];
 
 		return JSON.parse(stored) as Spending[];
 	}
 	function storeSpendingLocally(spending: Spending) {
-		const stored = loadStoredSpendings();
+		const stored = loadLocallyStoredSpendings();
 		stored.push(spending);
 
 		localStorage.setItem("papan-pending", JSON.stringify(stored));
+	}
+
+	async function onlineSave(spending: Spending) {
+		const res = await createSpending({
+			amount: Number(spending.amount),
+			note: spending.note,
+		});
+
+		return res;
+	}
+
+	async function localSave(spending: Spending) {
+		storeSpendingLocally(spending);
+		return spending;
 	}
 </script>
 
@@ -206,6 +260,13 @@
 		<span class="text-violet-400 font-semibold">RM 10.00 budget</span>
 	</section>
 	<section id="spending-list">
+		{#if !isOnline}
+			<div
+				class="p-4 rounded-lg mb-4 bg-red-600 text-white border border-red-800 text-sm"
+			>
+				<span>You are currently not connected to the server</span>
+			</div>
+		{/if}
 		{#if loading}
 			<div
 				class="loading-spendings py-16 px-4 text-center flex items-center justify-center"
@@ -228,19 +289,22 @@
 			</div>
 		{/if}
 
-		<ul>
-			{#each displaySpendings as [date, spendings]}
-				<li
-					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 even:bg-black/25"
+		{#each Object.entries(groupedSpendingItems) as [date, spendingItems]}
+			<hr class="first:hidden border border-gray-600" />
+			<div class="group-items my-4">
+				<p
+					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400"
 				>
 					<span>{formatDateGroup(new Date(date))}</span>
-				</li>
+				</p>
 
-				{#each spendings as spending (spending.spending.id)}
-					<SpendingItem item={spending} />
-				{/each}
-			{/each}
-		</ul>
+				<ul>
+					{#each spendingItems as spendingItem (spendingItem.spending.id)}
+						<SpendingItem item={spendingItem} />
+					{/each}
+				</ul>
+			</div>
+		{/each}
 	</section>
 
 	<div id="bottom-bar" class="p-4 fixed bottom-0 left-0 w-full bg-gray-800">
