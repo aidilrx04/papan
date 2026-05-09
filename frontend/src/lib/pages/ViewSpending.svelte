@@ -5,6 +5,7 @@
 	import { currencyFormatter, dateFormatter } from "../formatter";
 	import { navigate } from "../router";
 	import { deleteSpending, getSpending, type Spending } from "../db";
+	import * as api from "../api";
 
 	const ID_RE = /\/spending\/(\d+)/;
 	const path = location.pathname;
@@ -13,10 +14,6 @@
 	let loading = $state(true);
 	let spending = $state<Spending | null>();
 	let error = $state<any | null>(null);
-
-	$effect(() => {
-		console.log(error);
-	});
 
 	onMount(function () {
 		getSpending(spendingId)
@@ -43,9 +40,17 @@
 	}
 
 	function confirmDelete() {
-		deleteSpending(spendingId).then(() => {
-			console.log("deleted");
-			location.href = "/";
+		if (!spending) return;
+
+		let promise = spending.apiId
+			? api.deleteSpending(spending.apiId)
+			: new Promise<boolean>((resolve, reject) => resolve(true));
+
+		promise.finally(() => {
+			deleteSpending(spendingId).then(() => {
+				console.log("deleted");
+				location.href = "/";
+			});
 		});
 	}
 
