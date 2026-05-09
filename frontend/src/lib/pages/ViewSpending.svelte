@@ -3,13 +3,14 @@
 	import Modal from "../components/Modal.svelte";
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, dateFormatter } from "../formatter";
-	import { navigate } from "../router";
+	import { navigate, route } from "../router";
 	import { deleteSpending, getSpending, type Spending } from "../db";
 	import * as api from "../api";
 
-	const ID_RE = /\/spending\/(\d+)/;
-	const path = location.pathname;
-	const spendingId = Number(path.match(ID_RE)?.[1]);
+	const { params } = route;
+	const spendingId = params.id ? Number(params.id) : undefined;
+
+	if (!spendingId) throw new Error("Spending Id not found");
 
 	let loading = $state(true);
 	let spending = $state<Spending | null>();
@@ -18,7 +19,7 @@
 	onMount(function () {
 		getSpending(spendingId)
 			.then(function (_spending) {
-				if (_spending === null) {
+				if (_spending === null || !_spending) {
 					throw new Error("Not Found");
 				}
 				spending = _spending;
@@ -47,7 +48,7 @@
 			: new Promise<boolean>((resolve, reject) => resolve(true));
 
 		promise.finally(() => {
-			deleteSpending(spendingId).then(() => {
+			deleteSpending(spendingId!).then(() => {
 				console.log("deleted");
 				location.href = "/";
 			});
