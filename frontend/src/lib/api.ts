@@ -56,3 +56,18 @@ function toApiSpending(rawResponse: any): ApiSpending {
 		date: rawResponse.date
 	}
 }
+
+export async function ping(): Promise<boolean> {
+	try {
+		const res = await fetch(`${API_URL}/ping.php`, {
+			method: 'HEAD',
+			cache: 'no-store',
+		});
+		if (res.status !== 200) throw new Error(`Server return status other than OK: ${res.status} ${res.statusText}`,)
+		return true;
+	}
+	catch (e) {
+		console.debug(e)
+		return false;
+	}
+}

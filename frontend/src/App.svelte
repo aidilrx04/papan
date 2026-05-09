@@ -2,6 +2,8 @@
 	import { Router } from "sv-router";
 	import "./lib/router";
 	import "./lib/db";
+	import { onMount } from "svelte";
+	import { beginHealthcheck } from "./lib/healthcheck.svelte";
 
 	if ("serviceWorker" in navigator) {
 		window.addEventListener("load", () => {
@@ -11,6 +13,12 @@
 				.catch((err) => console.log("Registration failed:", err));
 		});
 	}
+
+	onMount(() => {
+		const clean = beginHealthcheck();
+
+		return clean;
+	});
 </script>
 
 <Router />
