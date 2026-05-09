@@ -1,4 +1,6 @@
-export type Spending = {
+import type { Spending } from "./db";
+
+export type ApiSpending = {
 	id: number;
 	amount: string;
 	note: string;
@@ -15,8 +17,6 @@ export type SpendingGroups = {
 }
 
 export type SpendingItemDetail = {
-	isSaved: boolean;
 	spending: Spending;
-	errorMessage?: string;
 	group: string;
 }

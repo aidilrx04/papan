@@ -1,14 +1,14 @@
-import type { PendingCreateSpending, Spending } from "./types";
+import type { ApiSpending, PendingCreateSpending } from "./types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1';
 
-export async function getSpendings(): Promise<Spending[]> {
+export async function getSpendings(): Promise<ApiSpending[]> {
 	const res = await fetch(`${API_URL}/`);
 
 	return await res.json();
 }
 
-export async function createSpending(data: PendingCreateSpending): Promise<Spending | false> {
+export async function createSpending(data: PendingCreateSpending): Promise<ApiSpending | false> {
 	const res = await fetch(`${API_URL}/`, {
 		method: "POST",
 		body: JSON.stringify({
@@ -26,7 +26,7 @@ export async function createSpending(data: PendingCreateSpending): Promise<Spend
 	return (await res.json())?.spending;
 }
 
-export async function getSpending(id: number): Promise<Spending | null> {
+export async function getSpending(id: number): Promise<ApiSpending | null> {
 	const res = await fetch(`${API_URL}/spending.php?id=${id}`);
 
 	if (res.status === 404) return null;

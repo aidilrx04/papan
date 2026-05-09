@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Spending } from "../db";
 	import type { PendingCreateSpending } from "../types";
 
 	const numberFormatter = new Intl.NumberFormat("ms-MY", {
@@ -22,7 +23,7 @@
 		onSpendingCreated,
 	}: {
 		hideModal: () => void;
-		onSpendingCreated?: (e: PendingCreateSpending) => void;
+		onSpendingCreated?: (e: Spending) => void;
 	} = $props();
 
 	function onAdd(e: Event) {
@@ -37,6 +38,7 @@
 			onSpendingCreated({
 				amount: realAmount,
 				note,
+				date: new Date(),
 			});
 		}
 

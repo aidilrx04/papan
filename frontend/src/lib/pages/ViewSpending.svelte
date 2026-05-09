@@ -1,23 +1,17 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { deleteSpending, getSpending } from "../api";
 	import Modal from "../components/Modal.svelte";
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, dateFormatter } from "../formatter";
-	import type { Spending } from "../types";
 	import { navigate } from "../router";
+	import { deleteSpending, getSpending, type Spending } from "../db";
 
 	const ID_RE = /\/spending\/(\d+)/;
 	const path = location.pathname;
 	const spendingId = Number(path.match(ID_RE)?.[1]);
 
 	let loading = $state(true);
-	let spending = $state<Spending>({
-		id: -1,
-		amount: "",
-		date: "",
-		note: "",
-	});
+	let spending = $state<Spending | null>();
 	let error = $state<any | null>(null);
 
 	$effect(() => {
@@ -49,10 +43,10 @@
 	}
 
 	function confirmDelete() {
-		deleteSpending(spendingId).then((b) => {
-			console.log("deleted: ", b);
+		deleteSpending(spendingId).then(() => {
+			console.log("deleted");
+			location.href = "/";
 		});
-		location.href = "/";
 	}
 
 	function handleFetchError(err: Error) {
@@ -105,7 +99,7 @@
 					<span
 						class=" font-bold mb-4 text-4xl tracking-wide block text-violet-400"
 						>{currencyFormatter.format(
-							Number(spending.amount),
+							Number(spending!.amount),
 						)}</span
 					>
 				</div>
@@ -117,8 +111,8 @@
 					>
 
 					<span class="text-gray-200 mb-4 text-lg block"
-						>{spending.date
-							? dateFormatter.format(new Date(spending.date))
+						>{spending!.date
+							? dateFormatter.format(spending!.date)
 							: "Unspecified"}</span
 					>
 				</div>
@@ -129,7 +123,7 @@
 						>Note</span
 					>
 					<p class="text-gray-200 mb-4 text-lg block">
-						{spending.note}
+						{spending!.note}
 					</p>
 				</div>
 			{/if}
