@@ -141,7 +141,8 @@
 		let spendings: Spending[] = [];
 
 		for (const apiSpending of apiSpendings) {
-			if (await apiSpendingExist(apiSpending.id)) continue;
+			const exist = await apiSpendingExist(apiSpending.id);
+			if (exist) continue;
 
 			const spending: Spending = {
 				apiId: apiSpending.id,
