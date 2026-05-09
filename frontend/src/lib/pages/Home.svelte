@@ -50,10 +50,9 @@
 			const spendings = await saveSpendingsLocally(apiSpendings);
 
 			spendingItems.push(
-				...spendings.map<SpendingItemDetail>((spending) => ({
-					group: spending.date.toString(),
-					spending,
-				})),
+				...spendings.map<SpendingItemDetail>((spending) =>
+					toSpendingItemDetail(spending),
+				),
 			);
 
 			sortSpendingItems();
@@ -88,10 +87,7 @@
 	async function onSpendingCreated(spending: Spending) {
 		hideModal();
 
-		spendingItems.unshift({
-			group: spending.date.toString(),
-			spending: spending,
-		});
+		spendingItems.unshift(toSpendingItemDetail(spending));
 
 		const spendingItemProxy = spendingItems[0];
 
@@ -108,6 +104,7 @@
 
 		// update local data
 		if (!newSpending.id) throw new Error("Invalid state");
+
 		const success = await updateSpending(
 			$state.snapshot(spendingItemProxy.spending),
 		);
@@ -115,26 +112,12 @@
 		return;
 	}
 
-	function normalizeDate(date: string) {
-		const d = new Date(date);
-		return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+	function normalizeDate(date: Date) {
+		return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 	}
 
 	function isSpendingEmpty() {
 		return spendingItems.length === 0;
-	}
-
-	function loadLocallyStoredSpendings() {
-		const stored = localStorage.getItem("papan-pending");
-		if (!stored) return [];
-
-		return JSON.parse(stored) as Spending[];
-	}
-	function storeSpendingLocally(spending: Spending) {
-		const stored = loadLocallyStoredSpendings();
-		stored.push(spending);
-
-		localStorage.setItem("papan-pending", JSON.stringify(stored));
 	}
 
 	async function loadLocalSpendings() {
@@ -143,15 +126,11 @@
 
 		try {
 			const spendings = await getSpendings();
-			const _spendingItems: SpendingItemDetail[] = [];
-			for (const spending of spendings) {
-				_spendingItems.push({
-					group: spending.date.toString(),
-					spending,
-				});
-			}
+			spendingItems.push(
+				...spendings.map((spending) => toSpendingItemDetail(spending)),
+			);
 
-			spendingItems = _spendingItems;
+			sortSpendingItems();
 		} catch (e) {
 		} finally {
 			loading = false;
@@ -184,6 +163,13 @@
 		spendingItems.sort((a, b) => {
 			return b.spending.date.getTime() - a.spending.date.getTime();
 		});
+	}
+
+	function toSpendingItemDetail(spending: Spending): SpendingItemDetail {
+		return {
+			group: normalizeDate(spending.date).toString(),
+			spending,
+		};
 	}
 </script>
 
