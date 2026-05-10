@@ -14,7 +14,6 @@
 		type Spending,
 	} from "../db";
 	import * as api from "../api";
-	import { online } from "svelte/reactivity/window";
 	import { isInit, isUp } from "../healthcheck.svelte";
 
 	let loading = $state(true);
@@ -35,9 +34,18 @@
 
 	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingItems));
 
+	let pendingPush: SpendingItemDetail[] = $state([]);
+
 	onMount(async function () {
 		await loadLocalSpendings();
 		await loadSpendings();
+	});
+
+	$effect(() => {
+		if (isInit()) return;
+		if (!isUp()) return;
+
+		startPendingPush();
 	});
 
 	async function loadSpendings() {
@@ -130,6 +138,8 @@
 				...spendings.map((spending) => toSpendingItemDetail(spending)),
 			);
 
+			pendingPush = spendingItems.filter((item) => !item.spending.apiId);
+
 			sortSpendingItems();
 		} catch (e) {
 		} finally {
@@ -171,6 +181,33 @@
 			group: normalizeDate(spending.date).toString(),
 			spending,
 		};
+	}
+
+	async function startPendingPush() {
+		if (pendingPush.length === 0) return;
+
+		let successIndices: number[] = [];
+
+		for (let i = 0; i < pendingPush.length; i++) {
+			const pending = pendingPush[i];
+			const spending = pending.spending;
+			console.log(pending);
+			const successPushSpending = await api.createSpending(spending);
+
+			if (!successPushSpending) {
+				console.log("Failed to push spending with id: ", spending.id);
+				continue;
+			}
+
+			spending.apiId = successPushSpending.id;
+
+			const successUpdate = await updateSpending(
+				$state.snapshot(spending),
+			);
+			successIndices.push(i);
+		}
+
+		pendingPush = pendingPush.filter((_, i) => !successIndices.includes(i));
 	}
 </script>
 
