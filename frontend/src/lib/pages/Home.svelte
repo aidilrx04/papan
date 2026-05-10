@@ -9,6 +9,7 @@
 	import {
 		apiSpendingExist,
 		createSpending,
+		deleteSpending,
 		getSpendings,
 		updateSpending,
 		type Spending,
@@ -30,11 +31,12 @@
 		}, {}),
 	);
 
-	// $inspect(spendingItems);
+	$inspect(spendingItems);
 
 	let totalSpent = $derived.by(() => calculateTotalSpendings(spendingItems));
 
 	let pendingPush: SpendingItemDetail[] = $state([]);
+	let pendingDelete = $state<Spending[]>([]);
 
 	onMount(async function () {
 		await loadLocalSpendings();
@@ -46,14 +48,20 @@
 		if (!isUp()) return;
 
 		startPendingPush();
+		startPendingDelete();
 	});
 
 	async function loadSpendings() {
 		error = null;
 		let apiSpendings: ApiSpending[] = [];
 
+		const pendingDeleteId = pendingDelete.map((spending) => spending.apiId);
+
 		try {
-			apiSpendings = await api.getSpendings();
+			apiSpendings = (await api.getSpendings()).filter(
+				// do not include spendings that are to be delete
+				(apiSpending) => !pendingDeleteId.includes(apiSpending.id),
+			);
 
 			const spendings = await saveSpendingsLocally(apiSpendings);
 
@@ -65,7 +73,7 @@
 
 			sortSpendingItems();
 		} catch (e: unknown) {
-			console.debug(e);
+			console.error(e);
 			console.warn("Unable to connect to server.");
 		}
 	}
@@ -133,7 +141,11 @@
 		error = null;
 
 		try {
-			const spendings = await getSpendings();
+			let spendings = await getSpendings();
+
+			pendingDelete = spendings.filter((spending) => spending.isDeleted);
+			spendings = spendings.filter((spending) => !spending.isDeleted);
+
 			spendingItems.push(
 				...spendings.map((spending) => toSpendingItemDetail(spending)),
 			);
@@ -166,6 +178,8 @@
 
 			spendings.push(spending);
 		}
+
+		console.log(spendings);
 
 		return spendings;
 	}
@@ -208,6 +222,28 @@
 		}
 
 		pendingPush = pendingPush.filter((_, i) => !successIndices.includes(i));
+	}
+
+	async function startPendingDelete() {
+		if (pendingDelete.length === 0) return;
+
+		for (const spending of pendingDelete) {
+			try {
+				if (!spending.apiId) {
+					throw new Error(
+						`Invalid state of spending with id: ${spending.id}. apiId is not found`,
+					);
+				}
+
+				await api.deleteSpending(spending.apiId);
+
+				// delete record locally
+				await deleteSpending(spending.id!);
+				console.log(`Pending record: ${spending.id} deleted.`);
+			} catch (error) {
+				console.error(error);
+			}
+		}
 	}
 </script>
 

@@ -45,7 +45,9 @@ export async function deleteSpending(id: number) {
 		})
 	});
 
-	return res.status === 200 ? true : false;
+	if (res.status !== 200) throw new Error(`Failed to delete spending with id: ${id}`);
+
+	return true;
 }
 
 function toApiSpending(rawResponse: any): ApiSpending {

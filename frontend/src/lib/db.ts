@@ -5,7 +5,8 @@ export type Spending = {
 	apiId?: number;
 	amount: number;
 	note: string;
-	date: Date
+	date: Date;
+	isDeleted?: boolean
 }
 interface PapanDB extends DBSchema {
 	spendings: {
@@ -24,12 +25,12 @@ const SPENDINGS_STORE_NAME = 'spendings';
 
 const db = await openDB<PapanDB>(DB_NAME, DB_VERSION, {
 	upgrade(database, oldVersion, newVersion, transaction, event) {
-		const store = database.createObjectStore(SPENDINGS_STORE_NAME, {
+		const spendingStore = database.createObjectStore(SPENDINGS_STORE_NAME, {
 			keyPath: 'id',
 			autoIncrement: true
 		});
 
-		store.createIndex('apiId', 'apiId');
+		spendingStore.createIndex('apiId', 'apiId');
 	},
 	blocked(currentVersion, blockedVersion, event) {
 		console.log('Blocked', event);
@@ -64,7 +65,7 @@ export async function createSpending(spending: Spending) {
 	return (await getSpending(spendingId))!;
 }
 
-export async function updateSpending(spending: Spending) {
+export async function updateSpending(spending: Partial<Spending>) {
 	const store = db.transaction('spendings', 'readwrite').store;
 
 	return await store.put(spending);

@@ -4,8 +4,14 @@
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, dateFormatter } from "../formatter";
 	import { navigate, route } from "../router";
-	import { deleteSpending, getSpending, type Spending } from "../db";
+	import {
+		deleteSpending,
+		getSpending,
+		updateSpending,
+		type Spending,
+	} from "../db";
 	import * as api from "../api";
+	import { PendingDelete } from "../errors";
 
 	const { params } = route;
 	const spendingId = params.id ? Number(params.id) : undefined;
@@ -22,6 +28,13 @@
 				if (_spending === null || !_spending) {
 					throw new Error("Not Found");
 				}
+
+				if (_spending.isDeleted) {
+					throw new PendingDelete(
+						"Item is already pending to be deleted.",
+					);
+				}
+
 				spending = _spending;
 			})
 			.catch(handleFetchError)
@@ -40,24 +53,44 @@
 		isDeleteModalShown = false;
 	}
 
-	function confirmDelete() {
+	async function confirmDelete() {
 		if (!spending) return;
 
 		let promise = spending.apiId
 			? api.deleteSpending(spending.apiId)
 			: new Promise<boolean>((resolve, reject) => resolve(true));
 
-		promise.finally(() => {
-			deleteSpending(spendingId!).then(() => {
-				console.log("deleted");
-				location.href = "/";
+		try {
+			await promise;
+
+			// if item is local and have no server tie
+			// just delete it
+			await deleteSpending(spending.id!);
+		} catch (e) {
+			// failed to delete something
+			// set item to be deleted later
+			console.error(e);
+			console.log("Failed to delete spending on server");
+			console.log("Flagging the spending as deleted for future");
+			const updateRes = updateSpending({
+				...spending,
+				isDeleted: true,
 			});
-		});
+		} finally {
+			navigate("/");
+		}
 	}
 
 	function handleFetchError(err: Error) {
+		console.error(err);
 		error = error ?? {};
 		error.message = err.message;
+
+		if (err instanceof PendingDelete) {
+			error.message = "Not Found";
+			return;
+		}
+
 		if (err.message === "Failed to fetch") {
 			error.message = "Unable to connect to server.";
 		}
