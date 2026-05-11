@@ -4,13 +4,7 @@
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, dateFormatter } from "../formatter";
 	import { navigate, route } from "../router";
-	import {
-		deleteSpending,
-		getSpending,
-		updateSpending,
-		type Spending,
-	} from "../db";
-	import * as api from "../api";
+	import { getSpending, type Spending } from "../db";
 	import { PendingDelete } from "../errors";
 	import { spendingService } from "../spendings.svelte";
 	import TopBar from "../components/TopBar.svelte";
@@ -21,7 +15,7 @@
 	if (!spendingId) throw new Error("Spending Id not found");
 
 	let loading = $state(true);
-	let spending = $state<Spending | null>();
+	let spending = $state<Spending | null>(null);
 	let error = $state<any | null>(null);
 
 	onMount(function () {
@@ -60,10 +54,9 @@
 
 		try {
 			await spendingService.softDelete($state.snapshot(spending));
+			navigate("/");
 		} catch (e) {
 			console.error(e);
-		} finally {
-			navigate("/");
 		}
 	}
 
@@ -92,7 +85,7 @@
 
 	<div class="p-4 flex justify-between items-center">
 		<button onclick={goBack} class="text-sky-400 cursor-pointer"
-			>Back</button
+			>&lt; Back</button
 		>
 		<h1 class="text-gray-100 font-semibold text-xl">Spending</h1>
 		<button
