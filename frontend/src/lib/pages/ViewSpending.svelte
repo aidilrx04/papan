@@ -74,7 +74,7 @@
 			console.log("Flagging the spending as deleted for future");
 			const updateRes = updateSpending({
 				...spending,
-				isDeleted: true,
+				isDeleted: 1,
 			});
 		} finally {
 			navigate("/");

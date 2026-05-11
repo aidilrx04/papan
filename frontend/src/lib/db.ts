@@ -6,14 +6,15 @@ export type Spending = {
 	amount: number;
 	note: string;
 	date: Date;
-	isDeleted?: boolean
+	isDeleted?: number; // 1 is true
 }
 interface PapanDB extends DBSchema {
 	spendings: {
 		key: number; // id
 		value: Spending,
 		indexes: {
-			apiId?: number
+			apiId?: number,
+			isDeleted?: number;
 		}
 	},
 }
@@ -31,6 +32,7 @@ const db = await openDB<PapanDB>(DB_NAME, DB_VERSION, {
 		});
 
 		spendingStore.createIndex('apiId', 'apiId');
+		spendingStore.createIndex('isDeleted', 'isDeleted');
 	},
 	blocked(currentVersion, blockedVersion, event) {
 		console.log('Blocked', event);
@@ -65,7 +67,7 @@ export async function createSpending(spending: Spending) {
 	return (await getSpending(spendingId))!;
 }
 
-export async function updateSpending(spending: Partial<Spending>) {
+export async function updateSpending(spending: Spending) {
 	const store = db.transaction('spendings', 'readwrite').store;
 
 	return await store.put(spending);
@@ -81,4 +83,11 @@ export async function apiSpendingExist(apiId: number) {
 	const exist = await store.index('apiId').count(apiId)
 
 	return exist > 0
+}
+
+export async function getDeletedSpendings() {
+	const store = db.transaction('spendings').store;
+	const isDeleted = store.index('isDeleted');
+
+	return isDeleted.getAll();
 }
