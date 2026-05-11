@@ -2,24 +2,26 @@ import type { SpendingItemDetail } from "./types"
 import * as db from './db'
 import * as api from './api'
 import { SpendingMapper } from "./spending-mapper";
-import { isInit, isUp } from "./healthcheck.svelte";
+import { isUpAndReady } from "./healthcheck.svelte";
+import { untrack } from "svelte";
 
 class SpendingService {
 	items = $state<SpendingItemDetail[]>([])
 	loading = $state(true);
 	error = $state<Error | null>(null);
 
+	shouldSync = $state(true);
+
 	totalSpent = $derived.by(() => this.items.reduce<number>((carry, item) => carry + item.spending.amount, 0))
 
 	constructor() {
 		$effect.root(() => {
 			$effect(() => {
-				const reachable = isUp();
-				const ready = !isInit()
+				const ready = isUpAndReady()
+				const trigger = this.shouldSync;
 
-				if (!reachable || !ready) return;
-
-				this.sync()
+				if (ready && trigger)
+					untrack(() => this.sync())
 			})
 		})
 	}
@@ -48,12 +50,29 @@ class SpendingService {
 		const newRecord = await db.createSpending(spending)
 
 		this.items.unshift(SpendingMapper.toItemDetail(newRecord))
-
-		this.sync()
+		this.sortItems()
+		this.syncNow();
 	}
 
+	async softDelete(spending: db.Spending) {
+		if (!spending.id) throw new Error('Invalid state. Field `id` is missing')
+
+		await db.updateSpending({
+			...spending,
+			isDeleted: 1
+		})
+
+		this.items = this.items.filter((item) => item.spending.id !== spending.id)
+
+		this.syncNow();
+	}
+
+	syncNow() {
+		this.shouldSync = true;
+	}
 
 	async sync() {
+		this.shouldSync = false;
 		console.info('Syncing with server...')
 
 		// fetch api
@@ -110,15 +129,13 @@ class SpendingService {
 
 		for (const spending of toDelete) {
 			try {
-				if (!spending.apiId) throw new Error('Invalid spending. Field `apiId` does not exist');
+				if (spending.apiId !== undefined) {
+					console.debug(`Delete apiId=${spending.apiId}...`)
+					await api.deleteSpending(spending.apiId)
+				}
 
-				console.debug(`Deleting item id=${spending.id}...`)
-				// delete api
-				await api.deleteSpending(spending.apiId)
-
-				// delete local
+				console.debug(`Delete id=${spending.id}...`)
 				await db.deleteSpending(spending.id!)
-
 			}
 			catch (error: unknown) {
 				console.error(`Error occured whilst trying to delete an item.`, error)
@@ -127,7 +144,6 @@ class SpendingService {
 		}
 
 		console.info('Syncing with server completed')
-
 	}
 
 	sortItems() {

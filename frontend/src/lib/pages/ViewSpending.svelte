@@ -12,6 +12,7 @@
 	} from "../db";
 	import * as api from "../api";
 	import { PendingDelete } from "../errors";
+	import { spendingService } from "../spendings.svelte";
 
 	const { params } = route;
 	const spendingId = params.id ? Number(params.id) : undefined;
@@ -56,26 +57,10 @@
 	async function confirmDelete() {
 		if (!spending) return;
 
-		let promise = spending.apiId
-			? api.deleteSpending(spending.apiId)
-			: new Promise<boolean>((resolve, reject) => resolve(true));
-
 		try {
-			await promise;
-
-			// if item is local and have no server tie
-			// just delete it
-			await deleteSpending(spending.id!);
+			await spendingService.softDelete($state.snapshot(spending));
 		} catch (e) {
-			// failed to delete something
-			// set item to be deleted later
 			console.error(e);
-			console.log("Failed to delete spending on server");
-			console.log("Flagging the spending as deleted for future");
-			const updateRes = updateSpending({
-				...spending,
-				isDeleted: 1,
-			});
 		} finally {
 			navigate("/");
 		}

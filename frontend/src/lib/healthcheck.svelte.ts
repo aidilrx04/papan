@@ -18,6 +18,10 @@ export function isInit() {
 	return init;
 }
 
+export function isUpAndReady() {
+	return isUp() && !isInit()
+}
+
 export function beginHealthcheck() {
 	checkIsUp()
 	return cleanHealthcheck;
