@@ -5,6 +5,7 @@
 	import { onMount } from "svelte";
 	import { beginHealthcheck } from "./lib/healthcheck.svelte";
 	import TopBar from "./lib/components/TopBar.svelte";
+	import { spendingService } from "./lib/spendings.svelte";
 
 	if ("serviceWorker" in navigator) {
 		window.addEventListener("load", () => {
@@ -16,6 +17,7 @@
 	}
 
 	onMount(() => {
+		spendingService.init();
 		const clean = beginHealthcheck();
 
 		return clean;

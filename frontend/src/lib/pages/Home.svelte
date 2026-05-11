@@ -20,10 +20,6 @@
 		return map;
 	});
 
-	onMount(async function () {
-		spendingService.init();
-	});
-
 	let isModalShown = $state(false);
 
 	function showModal() {
