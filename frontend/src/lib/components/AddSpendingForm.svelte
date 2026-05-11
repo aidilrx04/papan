@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { Spending } from "../db";
-	import type { PendingCreateSpending } from "../types";
+	import { spendingService } from "../spendings.svelte";
 
 	const numberFormatter = new Intl.NumberFormat("ms-MY", {
 		maximumFractionDigits: 2,
@@ -8,8 +7,6 @@
 		style: "decimal",
 		trailingZeroDisplay: "auto",
 	});
-
-	let amountInputElement: HTMLInputElement | undefined = $state();
 
 	let amountBuffer = $state("0");
 	let amountDisplay = $derived.by(() => {
@@ -20,30 +17,25 @@
 
 	let {
 		hideModal,
-		onSpendingCreated,
 	}: {
 		hideModal: () => void;
-		onSpendingCreated?: (e: Spending) => void;
 	} = $props();
 
 	function onAdd(e: Event) {
 		e.preventDefault();
 
 		let realAmount = Number(amountBuffer) * 0.01;
-		// createSpending({ amount: realAmount, note }).then(() => {
-		// 	getSpendings().then(setSpendings).catch(handleGetSpendingError);
-		// });
 
-		if (onSpendingCreated) {
-			onSpendingCreated({
-				amount: realAmount,
-				note,
-				date: new Date(),
-			});
-		}
+		spendingService.add({
+			amount: realAmount,
+			note,
+			date: new Date(),
+		});
 
 		amountBuffer = "0";
 		note = "";
+
+		hideModal();
 	}
 
 	function handleAmountChange(e: KeyboardEvent) {
@@ -89,7 +81,6 @@
 			name="amount"
 			id="amount"
 			autocomplete="off"
-			bind:this={amountInputElement}
 			value={amountDisplay}
 			onkeydown={handleAmountChange}
 		/>

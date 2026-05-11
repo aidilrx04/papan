@@ -163,6 +163,6 @@
 
 {#if isModalShown}
 	<Modal {hideModal}>
-		<AddSpendingForm {hideModal} {onSpendingCreated} />
+		<AddSpendingForm {hideModal} />
 	</Modal>
 {/if}

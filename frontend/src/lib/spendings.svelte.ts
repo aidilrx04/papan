@@ -44,6 +44,14 @@ class SpendingService {
 		}
 	}
 
+	async add(spending: db.Spending) {
+		const newRecord = await db.createSpending(spending)
+
+		this.items.unshift(SpendingMapper.toItemDetail(newRecord))
+
+		this.sync()
+	}
+
 
 	async sync() {
 		console.info('Syncing with server...')
@@ -84,10 +92,12 @@ class SpendingService {
 		for (const { spending } of toPush) {
 			console.debug(`Pushing item id=${spending.id}...`)
 			try {
-				const success = await api.createSpending(spending)
-				if (!success) throw new Error(`Failed to create spending id=${spending.id}`);
+				const newRecord = await api.createSpending(spending)
+				if (!newRecord) throw new Error(`Failed to create spending id=${spending.id}`);
 
-				console.debug(`Item id=${spending.id} pushed successfully with apiId=${success.id}`)
+				spending.apiId = newRecord.id
+				await db.updateSpending($state.snapshot(spending))
+				console.debug(`Item id=${spending.id} pushed successfully with apiId=${newRecord.id}`)
 			} catch (error) {
 				console.error(`Error occured whilst pushing item id=${spending.id}`, error)
 				break;
