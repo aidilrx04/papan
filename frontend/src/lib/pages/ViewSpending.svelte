@@ -13,6 +13,7 @@
 	import * as api from "../api";
 	import { PendingDelete } from "../errors";
 	import { spendingService } from "../spendings.svelte";
+	import TopBar from "../components/TopBar.svelte";
 
 	const { params } = route;
 	const spendingId = params.id ? Number(params.id) : undefined;
@@ -86,7 +87,9 @@
 	}
 </script>
 
-<div id="view-spending" class="h-screen flex flex-col">
+<div id="view-spending" class="h-dvh flex flex-col">
+	<TopBar />
+
 	<div class="p-4 flex justify-between items-center">
 		<button onclick={goBack} class="text-sky-400 cursor-pointer"
 			>Back</button

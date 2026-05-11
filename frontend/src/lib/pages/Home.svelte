@@ -8,6 +8,7 @@
 	import SpendingItem from "../components/SpendingItem.svelte";
 	import { spendingService } from "../spendings.svelte";
 	import BalanceCard from "../components/BalanceCard.svelte";
+	import TopBar from "../components/TopBar.svelte";
 
 	let groupedItems = $derived.by(() => {
 		const map = new Map<string, SpendingItemDetail[]>();
@@ -31,6 +32,7 @@
 	}
 </script>
 
+<TopBar />
 <main id="papan-app" class="p-4 pb-24">
 	<section>
 		<BalanceCard />
