@@ -6,8 +6,6 @@
 	import { currencyFormatter, formatDateGroup } from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
 	import SpendingItem from "../components/SpendingItem.svelte";
-	import { createSpending, type Spending } from "../db";
-	import * as api from "../api";
 	import ConnectionStatus from "../components/ConnectionStatus.svelte";
 	import { spendingService } from "../spendings.svelte";
 
@@ -35,38 +33,6 @@
 	function hideModal() {
 		isModalShown = false;
 	}
-
-	async function onSpendingCreated(spending: Spending) {
-		hideModal();
-
-		// spendingItems.unshift(toSpendingItemDetail(spending));
-
-		// const spendingItemProxy = spendingItems[0];
-
-		// save locally
-		const newSpending = await createSpending(spending);
-		// spendingItemProxy.spending = newSpending;
-
-		// save to server
-		const apiSpending = await api.createSpending(newSpending);
-
-		if (!apiSpending) return;
-
-		// spendingItemProxy.spending.apiId = apiSpending.id;
-
-		// update local data
-		if (!newSpending.id) throw new Error("Invalid state");
-
-		// const success =
-		// await updateSpending();
-		// $state.snapshot(spendingItemProxy.spending),
-
-		return;
-	}
-
-	function normalizeDate(date: Date) {
-		return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-	}
 </script>
 
 <main id="papan-app" class="p-4 pb-24">
@@ -78,13 +44,6 @@
 			<span class="uppercase font-semibold block mb-1 text-gray-400">
 				You have spent
 			</span>
-			<div class="">
-				<div
-					class=" flex items-center justify-end px-4 py-2 gap-2 text-sm"
-				>
-					<ConnectionStatus />
-				</div>
-			</div>
 		</div>
 		<b class="font-bold text-4xl block mb-1 uppercase"
 			>{#if spendingService.loading || spendingService.error}

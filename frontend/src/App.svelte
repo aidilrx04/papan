@@ -4,6 +4,7 @@
 	import "./lib/db";
 	import { onMount } from "svelte";
 	import { beginHealthcheck } from "./lib/healthcheck.svelte";
+	import TopBar from "./lib/components/TopBar.svelte";
 
 	if ("serviceWorker" in navigator) {
 		window.addEventListener("load", () => {
@@ -21,4 +22,5 @@
 	});
 </script>
 
+<TopBar />
 <Router />
