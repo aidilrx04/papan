@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import Modal from "../components/Modal.svelte";
 	import { type SpendingItemDetail } from "../types";
 	import Spinner from "../components/Spinner.svelte";
@@ -60,7 +59,7 @@
 			</div>
 		{/if}
 
-		{#each groupedItems.entries() as [date, spendingItems]}
+		{#each groupedItems.entries() as [date, items]}
 			<hr class="first:hidden border border-gray-600" />
 			<div class="group-items my-4">
 				<p
@@ -70,8 +69,8 @@
 				</p>
 
 				<ul>
-					{#each spendingItems as spendingItem (spendingItem.spending.id)}
-						<SpendingItem item={spendingItem} />
+					{#each items as item (item.spending.id)}
+						<SpendingItem {item} />
 					{/each}
 				</ul>
 			</div>
