@@ -90,6 +90,7 @@ class SpendingService {
 
 				try {
 					const localSpending = await db.createSpending(SpendingMapper.toSpending(spending))
+					this.items.push(SpendingMapper.toItemDetail(localSpending))
 					console.debug(`Local record id=${localSpending.id} created`)
 				}
 				catch (error: unknown) {
@@ -98,6 +99,7 @@ class SpendingService {
 				}
 
 			}
+			this.sortItems()
 			console.debug(`Spendings fetched.`);
 		}
 		catch (error: unknown) {
