@@ -20,3 +20,10 @@ export type SpendingItemDetail = {
 	spending: Spending;
 	group: string;
 }
+
+export type Group = Map<string, GroupItem>;
+
+export type GroupItem = {
+	items: SpendingItemDetail[],
+	total: number;
+}

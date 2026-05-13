@@ -1,21 +1,37 @@
 <script lang="ts">
 	import Modal from "../components/Modal.svelte";
-	import { type SpendingItemDetail } from "../types";
+	import {
+		type Group,
+		type GroupItem,
+		type SpendingItemDetail,
+	} from "../types";
 	import Spinner from "../components/Spinner.svelte";
-	import { formatDateGroup } from "../formatter";
+	import { currencyFormatter, formatDateGroup } from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
 	import SpendingItem from "../components/SpendingItem.svelte";
 	import { spendingService } from "../spendings.svelte";
 	import BalanceCard from "../components/BalanceCard.svelte";
 	import TopBar from "../components/TopBar.svelte";
 
-	let groupedItems = $derived.by(() => {
-		const map = new Map<string, SpendingItemDetail[]>();
+	let groupedItems = $derived.by<Group>(() => {
+		const map = new Map<string, GroupItem>();
 
 		for (const item of spendingService.items) {
 			const key = item.group;
-			if (!map.has(key)) map.set(key, []);
-			map.get(key)?.push(item);
+			if (!map.has(key))
+				map.set(key, {
+					items: [],
+					total: 0,
+				});
+
+			map.get(key)?.items.push(item);
+		}
+
+		for (const [key, { total, items }] of map.entries()) {
+			map.get(key)!.total = items.reduce<number>(
+				(carry, item) => carry + item.spending.amount,
+				0,
+			);
 		}
 		return map;
 	});
@@ -59,13 +75,14 @@
 			</div>
 		{/if}
 
-		{#each groupedItems.entries() as [date, items]}
+		{#each groupedItems.entries() as [date, { items, total }]}
 			<hr class="first:hidden border border-gray-600" />
 			<div class="group-items my-4">
 				<p
-					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400"
+					class="uppercase text-sm font-semibold tracking-wide px-4 py-2 mt-4 first:mt-0 text-gray-400 flex items-center justify-between"
 				>
 					<span>{formatDateGroup(new Date(date))}</span>
+					<span>{currencyFormatter.format(total)}</span>
 				</p>
 
 				<ul>
