@@ -1,5 +1,4 @@
-import type { Spending } from "./db";
-import type { ApiSpending } from "./types";
+import type { APISpending, Spending } from "./types";
 
 
 export function normalizeDate(date: Date) {
@@ -14,12 +13,20 @@ export class SpendingMapper {
 		};
 	}
 
-	static toSpending(apiSpending: ApiSpending): Spending {
+	static toSpending(apiSpending: APISpending): Spending {
 		return {
 			apiId: apiSpending.id,
 			amount: Number(apiSpending.amount),
 			date: new Date(apiSpending.date),
 			note: apiSpending.note,
+		}
+	}
+
+	static toAPI(spending: Spending): APISpending {
+		return {
+			...spending,
+			id: spending.id || -1,
+			date: spending.date.toISOString()
 		}
 	}
 }

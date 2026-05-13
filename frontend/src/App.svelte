@@ -5,6 +5,7 @@
 	import { onMount } from "svelte";
 	import { beginHealthcheck } from "./lib/healthcheck.svelte";
 	import { spendingService } from "./lib/spendings.svelte";
+	import { db } from "./lib/db";
 
 	if ("serviceWorker" in navigator) {
 		window.addEventListener("load", () => {
@@ -16,7 +17,14 @@
 	}
 
 	onMount(() => {
-		spendingService.init();
+		db.open()
+			.then(() => {
+				spendingService.init();
+			})
+			.catch(() => {
+				console.error(`Failed to open database`);
+			});
+
 		const clean = beginHealthcheck();
 
 		return clean;

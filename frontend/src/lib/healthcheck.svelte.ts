@@ -1,4 +1,4 @@
-import { ping } from "./api";
+import { api } from "./api";
 
 let up = $state(false);
 let init = $state(true);
@@ -31,7 +31,7 @@ async function checkIsUp() {
 	clearTimeout(timeoutId)
 	timeoutId = undefined
 
-	up = await ping()
+	up = await api.ping()
 
 	init = false;
 

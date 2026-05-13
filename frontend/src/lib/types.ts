@@ -1,19 +1,17 @@
-import type { Spending } from "./db";
-
-export type ApiSpending = {
+export type APISpending = {
 	id: number;
-	amount: string;
+	amount: number;
 	note: string;
 	date: string;
 }
 
-export type PendingCreateSpending = {
+export type Spending = {
+	id?: number;
+	apiId?: number;
 	amount: number;
 	note: string;
-}
-
-export type SpendingGroups = {
-	[date: string]: SpendingItemDetail[]
+	date: Date;
+	isDeleted?: number; // 1 is true
 }
 
 export type SpendingItemDetail = {

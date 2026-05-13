@@ -1,9 +1,9 @@
-import type { SpendingItemDetail } from "./types"
-import * as db from './db'
-import * as api from './api'
+import type { Spending, SpendingItemDetail } from "./types"
 import { SpendingMapper } from "./spending-mapper";
 import { isUpAndReady } from "./healthcheck.svelte";
 import { untrack } from "svelte";
+import { API, api } from "./api";
+import { db, type Database } from "./db";
 
 class SpendingService {
 	items = $state<SpendingItemDetail[]>([])
@@ -14,7 +14,7 @@ class SpendingService {
 
 	totalSpent = $derived.by(() => this.items.reduce<number>((carry, item) => carry + item.spending.amount, 0))
 
-	constructor() {
+	constructor(private db: Database, private api: API,) {
 		$effect.root(() => {
 			$effect(() => {
 				const ready = isUpAndReady()
@@ -30,7 +30,7 @@ class SpendingService {
 		this.loading = true;
 
 		try {
-			const local = await db.getSpendings();
+			const local = await this.db.getAll();
 			this.items = local.filter(spending => !spending.isDeleted)
 				.map(SpendingMapper.toItemDetail)
 
@@ -46,18 +46,18 @@ class SpendingService {
 		}
 	}
 
-	async add(spending: db.Spending) {
-		const newRecord = await db.createSpending(spending)
+	async add(spending: Spending) {
+		const newRecord = await this.db.create(spending)
 
 		this.items.unshift(SpendingMapper.toItemDetail(newRecord))
 		this.sortItems()
 		this.syncNow();
 	}
 
-	async softDelete(spending: db.Spending) {
+	async softDelete(spending: Spending) {
 		if (!spending.id) throw new Error('Invalid state. Field `id` is missing')
 
-		await db.updateSpending({
+		await this.db.update({
 			...spending,
 			isDeleted: 1
 		})
@@ -78,9 +78,9 @@ class SpendingService {
 		// fetch api
 		console.debug('Fetching spendings from server...')
 		try {
-			const apiSpendings = await api.getSpendings();
+			const apiSpendings = await this.api.getAll();
 			for (const spending of apiSpendings) {
-				if (await db.apiSpendingExist(spending.id)) {
+				if (await this.db.apiExist(spending.id)) {
 					console.debug(`Item apiId=${spending.id} exist on local database. Skipping`);
 					continue;
 				}
@@ -89,7 +89,7 @@ class SpendingService {
 				console.debug('Creating new local record')
 
 				try {
-					const localSpending = await db.createSpending(SpendingMapper.toSpending(spending))
+					const localSpending = await this.db.create(SpendingMapper.toSpending(spending))
 					this.items.push(SpendingMapper.toItemDetail(localSpending))
 					console.debug(`Local record id=${localSpending.id} created`)
 				}
@@ -113,11 +113,11 @@ class SpendingService {
 		for (const { spending } of toPush) {
 			console.debug(`Pushing item id=${spending.id}...`)
 			try {
-				const newRecord = await api.createSpending(spending)
+				const newRecord = await this.api.create(SpendingMapper.toAPI(spending))
 				if (!newRecord) throw new Error(`Failed to create spending id=${spending.id}`);
 
 				spending.apiId = newRecord.id
-				await db.updateSpending($state.snapshot(spending))
+				await this.db.update($state.snapshot(spending))
 				console.debug(`Item id=${spending.id} pushed successfully with apiId=${newRecord.id}`)
 			} catch (error) {
 				console.error(`Error occured whilst pushing item id=${spending.id}`, error)
@@ -127,17 +127,17 @@ class SpendingService {
 
 		// push delete
 		console.debug(`Syncing delete requests...`);
-		const toDelete = await db.getDeletedSpendings();
+		const toDelete = await this.db.getDeleted();
 
 		for (const spending of toDelete) {
 			try {
 				if (spending.apiId !== undefined) {
 					console.debug(`Delete apiId=${spending.apiId}...`)
-					await api.deleteSpending(spending.apiId)
+					await this.api.delete(spending.apiId)
 				}
 
 				console.debug(`Delete id=${spending.id}...`)
-				await db.deleteSpending(spending.id!)
+				await this.db.delete(spending.id!)
 			}
 			catch (error: unknown) {
 				console.error(`Error occured whilst trying to delete an item.`, error)
@@ -157,4 +157,4 @@ class SpendingService {
 	}
 }
 
-export const spendingService = new SpendingService()
+export const spendingService = new SpendingService(db, api)

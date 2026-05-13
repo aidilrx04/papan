@@ -4,10 +4,11 @@
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, dateFormatter } from "../formatter";
 	import { navigate, route } from "../router";
-	import { getSpending, type Spending } from "../db";
+	import { db } from "../db";
 	import { PendingDelete } from "../errors";
 	import { spendingService } from "../spendings.svelte";
 	import TopBar from "../components/TopBar.svelte";
+	import type { Spending } from "../types";
 
 	const { params } = route;
 	const spendingId = params.id ? Number(params.id) : undefined;
@@ -19,7 +20,7 @@
 	let error = $state<any | null>(null);
 
 	onMount(function () {
-		getSpending(spendingId)
+		db.get(spendingId)
 			.then(function (_spending) {
 				if (_spending === null || !_spending) {
 					throw new Error("Not Found");
