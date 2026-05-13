@@ -27,7 +27,7 @@
 			map.get(key)?.items.push(item);
 		}
 
-		for (const [key, { total, items }] of map.entries()) {
+		for (const [key, { items }] of map.entries()) {
 			map.get(key)!.total = items.reduce<number>(
 				(carry, item) => carry + item.spending.amount,
 				0,
