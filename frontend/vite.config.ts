@@ -23,5 +23,8 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist/public'
-  }
+  },
+  resolve: process.env.VITEST ? {
+    conditions: ['browser']
+  } : undefined
 })
