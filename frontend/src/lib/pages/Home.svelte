@@ -1,10 +1,6 @@
 <script lang="ts">
 	import Modal from "../components/Modal.svelte";
-	import {
-		type Group,
-		type GroupItem,
-		type SpendingItemDetail,
-	} from "../types";
+	import { type Group, type GroupItem } from "../types";
 	import Spinner from "../components/Spinner.svelte";
 	import { currencyFormatter, formatDateGroup } from "../formatter";
 	import AddSpendingForm from "../components/AddSpendingForm.svelte";
