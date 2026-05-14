@@ -8,12 +8,13 @@
 	import { spendingService } from "../spendings.svelte";
 	import BalanceCard from "../components/BalanceCard.svelte";
 	import TopBar from "../components/TopBar.svelte";
+	import { Spending } from "../spending";
 
 	let groupedItems = $derived.by<Group>(() => {
 		const map = new Map<string, GroupItem>();
 
 		for (const item of spendingService.items) {
-			const key = item.group;
+			const key = Spending.group(item);
 			if (!map.has(key))
 				map.set(key, {
 					items: [],
@@ -25,7 +26,7 @@
 
 		for (const [key, { items }] of map.entries()) {
 			map.get(key)!.total = items.reduce<number>(
-				(carry, item) => carry + item.spending.amount,
+				(carry, item) => carry + item.amount,
 				0,
 			);
 		}
@@ -82,8 +83,8 @@
 				</p>
 
 				<ul>
-					{#each items as item (item.spending.id)}
-						<SpendingItem {item} />
+					{#each items as item (item.id)}
+						<SpendingItem spending={item} />
 					{/each}
 				</ul>
 			</div>

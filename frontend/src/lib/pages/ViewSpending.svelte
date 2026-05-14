@@ -8,7 +8,7 @@
 	import { PendingDelete } from "../errors";
 	import { spendingService } from "../spendings.svelte";
 	import TopBar from "../components/TopBar.svelte";
-	import type { Spending } from "../types";
+	import type { SpendingData } from "../spending";
 
 	const { params } = route;
 	const spendingId = params.id ? Number(params.id) : undefined;
@@ -16,7 +16,7 @@
 	if (!spendingId) throw new Error("Spending Id not found");
 
 	let loading = $state(true);
-	let spending = $state<Spending | null>(null);
+	let spending = $state<SpendingData | null>(null);
 	let error = $state<any | null>(null);
 
 	onMount(function () {
@@ -54,7 +54,7 @@
 		if (!spending) return;
 
 		try {
-			await spendingService.softDelete($state.snapshot(spending));
+			await spendingService.softDelete(spending);
 			navigate("/");
 		} catch (e) {
 			console.error(e);

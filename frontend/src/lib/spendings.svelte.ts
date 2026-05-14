@@ -1,18 +1,18 @@
-import type { Spending, SpendingItemDetail } from "./types"
-import { SpendingMapper } from "./spending-mapper";
 import { isUpAndReady } from "./healthcheck.svelte";
 import { untrack } from "svelte";
 import { API, api } from "./api";
 import { db, type Database } from "./db";
+import { Spending, type SpendingData } from "./spending";
+import type { NewSpendingData } from "./types";
 
 class SpendingService {
-	items = $state<SpendingItemDetail[]>([])
+	items = $state<SpendingData[]>([])
 	loading = $state(true);
 	error = $state<Error | null>(null);
 
 	shouldSync = $state(true);
 
-	totalSpent = $derived.by(() => this.items.reduce<number>((carry, item) => carry + item.spending.amount, 0))
+	totalSpent = $derived.by(() => this.items.reduce<number>((carry, item) => carry + item.amount, 0))
 
 	constructor(private db: Database, private api: API,) {
 		$effect.root(() => {
@@ -32,7 +32,6 @@ class SpendingService {
 		try {
 			const local = await this.db.getAll();
 			this.items = local.filter(spending => !spending.isDeleted)
-				.map(SpendingMapper.toItemDetail)
 
 			this.sortItems()
 		}
@@ -46,15 +45,15 @@ class SpendingService {
 		}
 	}
 
-	async add(spending: Spending) {
+	async add(spending: NewSpendingData) {
 		const newRecord = await this.db.create(spending)
 
-		this.items.unshift(SpendingMapper.toItemDetail(newRecord))
+		this.items.unshift(newRecord)
 		this.sortItems()
 		this.syncNow();
 	}
 
-	async softDelete(spending: Spending) {
+	async softDelete(spending: SpendingData) {
 		if (!spending.id) throw new Error('Invalid state. Field `id` is missing')
 
 		await this.db.update({
@@ -62,7 +61,7 @@ class SpendingService {
 			isDeleted: 1
 		})
 
-		this.items = this.items.filter((item) => item.spending.id !== spending.id)
+		this.items = this.items.filter((item) => item.id !== spending.id)
 
 		this.syncNow();
 	}
@@ -89,8 +88,8 @@ class SpendingService {
 				console.debug('Creating new local record')
 
 				try {
-					const localSpending = await this.db.create(SpendingMapper.toSpending(spending))
-					this.items.push(SpendingMapper.toItemDetail(localSpending))
+					const localSpending = await this.db.create(Spending.toData(spending))
+					this.items.push(localSpending)
 					console.debug(`Local record id=${localSpending.id} created`)
 				}
 				catch (error: unknown) {
@@ -109,11 +108,11 @@ class SpendingService {
 
 		// push local
 		console.debug(`Syncing local data...`);
-		const toPush = this.items.filter(({ spending }) => !spending.apiId)
-		for (const { spending } of toPush) {
+		const toPush = this.items.filter((spending) => !spending.apiId)
+		for (const spending of toPush) {
 			console.debug(`Pushing item id=${spending.id}...`)
 			try {
-				const newRecord = await this.api.create(SpendingMapper.toAPI(spending))
+				const newRecord = await this.api.create(Spending.toAPI(spending))
 				if (!newRecord) throw new Error(`Failed to create spending id=${spending.id}`);
 
 				spending.apiId = newRecord.id
@@ -149,7 +148,7 @@ class SpendingService {
 	}
 
 	sortItems() {
-		this.items.sort((spending1, spending2) => spending2.spending.date.getTime() - spending1.spending.date.getTime())
+		this.items.sort((spending1, spending2) => spending2.date.getTime() - spending1.date.getTime())
 	}
 
 	isEmpty() {

@@ -17,13 +17,7 @@
 	}
 
 	onMount(() => {
-		db.open()
-			.then(() => {
-				spendingService.init();
-			})
-			.catch(() => {
-				console.error(`Failed to open database`);
-			});
+		spendingService.init();
 
 		const clean = beginHealthcheck();
 

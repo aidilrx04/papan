@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { currencyFormatter } from "../formatter";
-	import type { SpendingItemDetail } from "../types";
-
+	import type { SpendingData } from "../spending";
 	let {
-		item,
+		spending,
 	}: {
-		item: SpendingItemDetail;
+		spending: SpendingData;
 	} = $props();
 
-	let spending = $derived.by(() => item.spending);
-
-	// $inspect(item);
+	// $inspect(spending);
 
 	function isUnclickable() {
 		// return item.errorMessage || item.isSaved === false;

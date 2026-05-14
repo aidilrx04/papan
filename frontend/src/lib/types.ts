@@ -1,3 +1,5 @@
+import { type SpendingData } from "./spending";
+
 export type APISpending = {
 	id: number;
 	amount: number;
@@ -5,23 +7,12 @@ export type APISpending = {
 	date: string;
 }
 
-export type Spending = {
-	id?: number;
-	apiId?: number;
-	amount: number;
-	note: string;
-	date: Date;
-	isDeleted?: number; // 1 is true
-}
-
-export type SpendingItemDetail = {
-	spending: Spending;
-	group: string;
-}
-
 export type Group = Map<string, GroupItem>;
 
 export type GroupItem = {
-	items: SpendingItemDetail[],
+	items: SpendingData[],
 	total: number;
 }
+
+export type NewSpendingData = Partial<SpendingData>
+export type UpdateSpendingData = NewSpendingData & { id: number }

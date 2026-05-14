@@ -64,7 +64,7 @@ export class API {
 
 	format(data: any): APISpending {
 		return {
-			amount: data.amount,
+			amount: Number(data.amount),
 			note: data.note,
 			id: Number(data.id),
 			date: data.date
