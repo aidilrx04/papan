@@ -15,13 +15,13 @@ interface PapanDB extends DBSchema {
 }
 
 export class Database {
-	static NAME = 'papan-spendings'
-	static VERSION = 1;
+	NAME = 'papan-spendings'
+	VERSION = 1;
 
 	db!: IDBPDatabase<PapanDB>;
 
 	async open() {
-		this.db = await openDB<PapanDB>(Database.NAME, Database.VERSION, {
+		this.db = await openDB<PapanDB>(this.NAME, this.VERSION, {
 			upgrade(database, oldVersion, newVersion, transaction, event) {
 				const spendingStore = database.createObjectStore('spendings', {
 					keyPath: 'id',
@@ -107,5 +107,3 @@ export class Database {
 }
 
 export const db = new Database()
-
-await db.open()

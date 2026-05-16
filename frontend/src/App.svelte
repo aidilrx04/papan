@@ -17,12 +17,16 @@
 	}
 
 	onMount(() => {
-		spendingService.init();
-
+		initServices();
 		const clean = beginHealthcheck();
 
 		return clean;
 	});
+
+	async function initServices() {
+		await db.open();
+		await spendingService.init();
+	}
 </script>
 
 <Router />

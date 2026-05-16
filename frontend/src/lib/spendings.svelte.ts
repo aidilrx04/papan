@@ -11,6 +11,7 @@ class SpendingService {
 	error = $state<Error | null>(null);
 
 	shouldSync = $state(true);
+	initCompleted = $state(false)
 
 	totalSpent = $derived.by(() => this.items.reduce<number>((carry, item) => carry + item.amount, 0))
 
@@ -20,7 +21,7 @@ class SpendingService {
 				const ready = isUpAndReady()
 				const trigger = this.shouldSync;
 
-				if (ready && trigger)
+				if (ready && trigger && this.initCompleted)
 					untrack(() => this.sync())
 			})
 		})
@@ -28,6 +29,7 @@ class SpendingService {
 
 	async init() {
 		this.loading = true;
+		this.initCompleted = true;
 
 		try {
 			const local = await this.db.getAll();
