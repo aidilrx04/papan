@@ -95,7 +95,7 @@ export class Database {
 		const store = this.db.transaction('spendings').store;
 		const isDeleted = store.index('isDeleted');
 
-		return await isDeleted.getAll();
+		return await isDeleted.getAll(1);
 	}
 
 	async apiExist(apiId: number): Promise<boolean> {
